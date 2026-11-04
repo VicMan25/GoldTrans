@@ -132,7 +132,7 @@ const styles = StyleSheet.create({
   filaTitulo: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: Spacing.sm },
   codigo: { fontSize: 13, fontWeight: '600', color: Colors.primaryDark, letterSpacing: 0.5 },
   paquete: { fontSize: 17, fontWeight: '700', color: Colors.text, marginTop: Spacing.xs },
-  detalle: { fontSize: 14, color: Colors.muted, marginTop: 2 },
+  detalle: { fontSize: 14, color: Colors.muted, marginTop: 2, flexShrink: 1 },
   alerta: { color: Colors.danger, fontWeight: '600' },
-  valor: { fontSize: 16, fontWeight: '700', color: Colors.primaryDark },
+  valor: { fontSize: 16, fontWeight: '700', color: Colors.primaryDark, flexShrink: 0 },
 });

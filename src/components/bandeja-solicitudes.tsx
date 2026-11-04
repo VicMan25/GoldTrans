@@ -132,7 +132,7 @@ export function BandejaSolicitudes({ encabezado }: { encabezado?: ReactNode }) {
                 </Text>
               ) : null}
               <View style={styles.filaTitulo}>
-                <Text style={styles.detalle}>
+                <Text style={[styles.detalle, styles.cede]}>
                   {c ? `${c.pasajeros} pas. · ${ETIQUETA_TIPO[c.tipo_vehiculo as TipoVehiculo] ?? c.tipo_vehiculo}` : ''}
                 </Text>
                 <Text style={styles.valor}>{formatearPesos(valorSolicitud(s))}</Text>
@@ -327,7 +327,8 @@ const styles = StyleSheet.create({
   codigo: { fontSize: 13, fontWeight: '600', color: Colors.primaryDark, letterSpacing: 0.5 },
   cliente: { fontSize: 16, fontWeight: '700', color: Colors.text, marginTop: Spacing.xs },
   detalle: { fontSize: 14, color: Colors.muted, marginTop: 2 },
-  valor: { fontSize: 16, fontWeight: '700', color: Colors.primaryDark },
+  valor: { fontSize: 16, fontWeight: '700', color: Colors.primaryDark, flexShrink: 0 },
+  cede: { flex: 1 },
   seccion: {
     fontSize: 13,
     fontWeight: '700',

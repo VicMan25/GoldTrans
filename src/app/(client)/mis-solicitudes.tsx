@@ -165,7 +165,7 @@ const styles = StyleSheet.create({
   codigo: { fontSize: 13, fontWeight: '600', color: Colors.primaryDark, letterSpacing: 0.5 },
   ruta: { fontSize: 17, fontWeight: '700', color: Colors.text, marginTop: Spacing.xs },
   detalle: { fontSize: 14, color: Colors.muted, marginTop: 2 },
-  valores: { flexDirection: 'row', alignItems: 'baseline', gap: Spacing.sm, marginTop: Spacing.sm },
+  valores: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'baseline', gap: Spacing.sm, marginTop: Spacing.sm },
   tachado: { fontSize: 14, color: Colors.muted, textDecorationLine: 'line-through' },
   valor: { fontSize: 20, fontWeight: '700', color: Colors.primaryDark },
   ayuda: { fontSize: 14, color: Colors.text, marginTop: Spacing.sm },

@@ -142,7 +142,7 @@ const styles = StyleSheet.create({
   presionada: { backgroundColor: Colors.surface },
   filaTitulo: { flexDirection: 'row', justifyContent: 'space-between', gap: Spacing.md },
   ruta: { flex: 1, fontSize: 16, fontWeight: '700', color: Colors.text },
-  total: { fontSize: 16, fontWeight: '800', color: Colors.primary },
+  total: { fontSize: 16, fontWeight: '800', color: Colors.primary, flexShrink: 0 },
   detalle: { fontSize: 14, color: Colors.muted, marginTop: 2 },
   desglose: { marginTop: Spacing.sm },
   solicitud: { flexDirection: 'row', alignItems: 'center', marginTop: Spacing.xs },

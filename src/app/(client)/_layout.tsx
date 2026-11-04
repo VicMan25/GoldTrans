@@ -1,10 +1,10 @@
 import { Tabs } from 'expo-router';
 
-import { iconoPestana, opcionesPestanas } from '@/components/navegacion';
+import { iconoPestana, propsPestanas } from '@/components/navegacion';
 
 export default function ClientLayout() {
   return (
-    <Tabs screenOptions={opcionesPestanas}>
+    <Tabs {...propsPestanas}>
       <Tabs.Screen
         name="mis-cotizaciones"
         options={{ title: 'Cotizaciones', tabBarIcon: iconoPestana('calculator') }}

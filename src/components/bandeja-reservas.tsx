@@ -445,7 +445,7 @@ const styles = StyleSheet.create({
   cliente: { fontSize: 16, fontWeight: '700', color: Colors.text, marginTop: Spacing.xs },
   detalle: { fontSize: 14, color: Colors.muted, marginTop: 2, flexShrink: 1 },
   alerta: { color: Colors.danger, fontWeight: '600' },
-  valor: { fontSize: 16, fontWeight: '700', color: Colors.primaryDark },
+  valor: { fontSize: 16, fontWeight: '700', color: Colors.primaryDark, flexShrink: 0 },
   plazo: { fontSize: 14, color: Colors.primaryDark, fontWeight: '600', marginTop: Spacing.sm },
   nota: {
     fontSize: 14,
