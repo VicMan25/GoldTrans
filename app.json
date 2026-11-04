@@ -9,6 +9,7 @@
     "userInterfaceStyle": "light",
     "ios": {},
     "android": {
+      "package": "com.goldtrans.app",
       "adaptiveIcon": {
         "backgroundColor": "#FFFFFF",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
