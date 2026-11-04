@@ -51,7 +51,7 @@ const styles = StyleSheet.create({
   concepto: { flex: 1 },
   descripcion: { fontSize: 15, color: Colors.text },
   detalle: { fontSize: 13, color: Colors.muted, marginTop: 2 },
-  valor: { fontSize: 15, color: Colors.text, fontVariant: ['tabular-nums'] },
+  valor: { fontSize: 15, color: Colors.text, fontVariant: ['tabular-nums'], flexShrink: 0 },
   filaTotal: {
     borderBottomWidth: 0,
     marginTop: Spacing.sm,
@@ -61,5 +61,5 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primary,
     alignItems: 'center',
   },
-  total: { fontSize: 18, fontWeight: '800', color: Colors.onPrimary, fontVariant: ['tabular-nums'] },
+  total: { fontSize: 18, fontWeight: '800', color: Colors.onPrimary, fontVariant: ['tabular-nums'], flexShrink: 0 },
 });

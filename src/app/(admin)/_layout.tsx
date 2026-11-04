@@ -1,10 +1,10 @@
 import { Tabs } from 'expo-router';
 
-import { iconoPestana, opcionesPestanas } from '@/components/navegacion';
+import { iconoPestana, propsPestanas } from '@/components/navegacion';
 
 export default function AdminLayout() {
   return (
-    <Tabs screenOptions={opcionesPestanas}>
+    <Tabs {...propsPestanas}>
       <Tabs.Screen name="usuarios" options={{ title: 'Usuarios', tabBarIcon: iconoPestana('people') }} />
       <Tabs.Screen name="flota" options={{ title: 'Flota', tabBarIcon: iconoPestana('bus') }} />
       <Tabs.Screen name="rutas" options={{ title: 'Rutas', tabBarIcon: iconoPestana('map') }} />
@@ -16,7 +16,7 @@ export default function AdminLayout() {
       <Tabs.Screen name="ventas" options={{ title: 'Ventas', tabBarIcon: iconoPestana('cash') }} />
       <Tabs.Screen
         name="documentos/index"
-        options={{ title: 'Portal de licitaciones', tabBarLabel: 'Portal', tabBarIcon: iconoPestana('folder-open') }}
+        options={{ title: 'Portal', tabBarIcon: iconoPestana('folder-open') }}
       />
     </Tabs>
   );
