@@ -54,6 +54,12 @@
         "projectId": "e41395da-1346-4cc0-99de-27e0e20249f8"
       }
     },
-    "owner": "vicman225"
+    "owner": "vicman225",
+    "runtimeVersion": {
+      "policy": "fingerprint"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/e41395da-1346-4cc0-99de-27e0e20249f8"
+    }
   }
 }
