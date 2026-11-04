@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import {
-  ActivityIndicator,
   FlatList,
   Modal,
   Pressable,
@@ -13,6 +12,7 @@ import {
 import { Boton } from '@/components/boton';
 import { CampoFecha } from '@/components/campo-fecha';
 import { CampoTexto } from '@/components/campo-texto';
+import { conEntrada, EsqueletoLista } from '@/components/cargando';
 import { EstadoVacio } from '@/components/estado-vacio';
 import { Insignia, type Tono } from '@/components/insignia';
 import { Mensaje } from '@/components/mensaje';
@@ -107,12 +107,12 @@ export default function Tarifas() {
         }
         ListEmptyComponent={
           cargando ? (
-            <ActivityIndicator color={Colors.primary} />
+            <EsqueletoLista />
           ) : (
             <EstadoVacio icono="pricetags-outline" texto="Aún no hay tarifas registradas." />
           )
         }
-        renderItem={({ item: t }) => {
+        renderItem={conEntrada(({ item: t }) => {
           const estado = estadoVigencia(t, hoy);
           return (
             <Pressable
@@ -139,7 +139,7 @@ export default function Tarifas() {
               </Text>
             </Pressable>
           );
-        }}
+        })}
       />
 
       <Modal

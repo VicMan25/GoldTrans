@@ -1,6 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import {
-  ActivityIndicator,
   FlatList,
   Linking,
   Modal,
@@ -14,6 +13,7 @@ import {
 import { Boton } from '@/components/boton';
 import { CampoFecha } from '@/components/campo-fecha';
 import { CampoTexto } from '@/components/campo-texto';
+import { CargandoPuntos, conEntrada, EsqueletoLista } from '@/components/cargando';
 import { EstadoVacio } from '@/components/estado-vacio';
 import { EstadoItemTexto, EstadoVigenciaTexto } from '@/components/estado-vigencia';
 import { Mensaje } from '@/components/mensaje';
@@ -147,7 +147,7 @@ export function ProcesosLicitacion({ encabezado }: { encabezado?: ReactNode }) {
         }
         ListEmptyComponent={
           cargando ? (
-            <ActivityIndicator color={Colors.primary} />
+            <EsqueletoLista />
           ) : (
             <EstadoVacio
               icono="briefcase-outline"
@@ -155,7 +155,7 @@ export function ProcesosLicitacion({ encabezado }: { encabezado?: ReactNode }) {
             />
           )
         }
-        renderItem={({ item: p }) => {
+        renderItem={conEntrada(({ item: p }) => {
           const { items, resumen } = evaluarProceso(p, hoy);
           const vencidos = items.filter((i) => i.estado === 'vencido').length;
           const cerrando = procesoAbierto(p.estado) && diasHasta(hoy, p.fecha_cierre) <= 7;
@@ -187,7 +187,7 @@ export function ProcesosLicitacion({ encabezado }: { encabezado?: ReactNode }) {
               </Text>
             </Pressable>
           );
-        }}
+        })}
       />
 
       <Modal
@@ -376,7 +376,7 @@ function DetalleProceso({
   if (!proceso) {
     return (
       <PantallaFormulario titulo="Proceso">
-        {error ? <Mensaje texto={error} /> : <ActivityIndicator color={Colors.primary} />}
+        {error ? <Mensaje texto={error} /> : <CargandoPuntos />}
         <Boton titulo="Cerrar" variante="secundario" onPress={onCerrar} />
       </PantallaFormulario>
     );

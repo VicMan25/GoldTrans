@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import {
-  ActivityIndicator,
   FlatList,
   Modal,
   Pressable,
@@ -13,6 +12,7 @@ import {
 import { Boton } from '@/components/boton';
 import { CampoFecha } from '@/components/campo-fecha';
 import { CampoTexto } from '@/components/campo-texto';
+import { conEntrada, EsqueletoLista } from '@/components/cargando';
 import { EstadoVacio } from '@/components/estado-vacio';
 import { Mensaje } from '@/components/mensaje';
 import { PantallaFormulario } from '@/components/pantalla-formulario';
@@ -92,12 +92,12 @@ export default function Flota() {
         }
         ListEmptyComponent={
           cargando ? (
-            <ActivityIndicator color={Colors.primary} />
+            <EsqueletoLista />
           ) : (
             <EstadoVacio icono="bus-outline" texto="Aún no hay vehículos registrados." />
           )
         }
-        renderItem={({ item: v }) => {
+        renderItem={conEntrada(({ item: v }) => {
           const estado = v.estado as EstadoVehiculo;
           return (
             <Pressable
@@ -124,7 +124,7 @@ export default function Flota() {
               ) : null}
             </Pressable>
           );
-        }}
+        })}
       />
 
       <Modal

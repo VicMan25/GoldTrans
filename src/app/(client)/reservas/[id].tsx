@@ -1,10 +1,11 @@
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 import { Boton } from '@/components/boton';
 import { CampoFecha } from '@/components/campo-fecha';
 import { CampoTexto } from '@/components/campo-texto';
+import { CargandoPuntos } from '@/components/cargando';
 import { EstadoAbonoTexto, EstadoReservaTexto } from '@/components/estado-reserva';
 import { Mensaje } from '@/components/mensaje';
 import { PantallaFormulario } from '@/components/pantalla-formulario';
@@ -56,7 +57,7 @@ export default function DetalleReserva() {
   if (!reserva) {
     return (
       <View style={styles.centro}>
-        {errorCarga ? <Mensaje texto={errorCarga} /> : <ActivityIndicator color={Colors.primary} />}
+        {errorCarga ? <Mensaje texto={errorCarga} /> : <CargandoPuntos />}
       </View>
     );
   }

@@ -2,11 +2,12 @@ import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState, type ReactNode } from 'react';
-import { ActivityIndicator, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Boton } from '@/components/boton';
 import { CampoFecha } from '@/components/campo-fecha';
 import { CampoTexto } from '@/components/campo-texto';
+import { CargandoPuntos } from '@/components/cargando';
 import { Mensaje } from '@/components/mensaje';
 import { PantallaFormulario } from '@/components/pantalla-formulario';
 import { SelectorOpciones } from '@/components/selector-opciones';
@@ -69,7 +70,7 @@ export default function EditorPaquete() {
   if (!nuevo && !paquete) {
     return (
       <View style={styles.centro}>
-        {error ? <Mensaje texto={error} /> : <ActivityIndicator color={Colors.primary} />}
+        {error ? <Mensaje texto={error} /> : <CargandoPuntos />}
       </View>
     );
   }

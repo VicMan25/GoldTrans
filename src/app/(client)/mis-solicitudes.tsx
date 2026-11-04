@@ -1,8 +1,9 @@
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, FlatList, RefreshControl, StyleSheet, Text, View } from 'react-native';
+import { FlatList, RefreshControl, StyleSheet, Text, View } from 'react-native';
 
 import { Boton } from '@/components/boton';
+import { conEntrada, EsqueletoLista } from '@/components/cargando';
 import { DesgloseCotizacion } from '@/components/desglose-cotizacion';
 import { EstadoSolicitudTexto } from '@/components/estado-solicitud';
 import { EstadoVacio } from '@/components/estado-vacio';
@@ -75,7 +76,7 @@ export default function MisSolicitudes() {
       ListHeaderComponent={<Mensaje texto={error} />}
       ListEmptyComponent={
         cargando ? (
-          <ActivityIndicator color={Colors.primary} />
+          <EsqueletoLista />
         ) : (
           <EstadoVacio
             icono="clipboard-outline"
@@ -83,7 +84,7 @@ export default function MisSolicitudes() {
           />
         )
       }
-      renderItem={({ item: s }) => {
+      renderItem={conEntrada(({ item: s }) => {
         const c = s.cotizacion;
         const estado = s.estado as EstadoSolicitud;
         const puedeCancelar = estado === 'pendiente' || estado === 'ajustada';
@@ -145,7 +146,7 @@ export default function MisSolicitudes() {
             </View>
           </View>
         );
-      }}
+      })}
     />
   );
 }

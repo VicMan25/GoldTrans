@@ -1,5 +1,7 @@
 import { StyleSheet, Text, View } from 'react-native';
+import Animated, { ZoomIn } from 'react-native-reanimated';
 
+import { Duracion, entradaLista } from '@/constants/animaciones';
 import { Colors, Spacing } from '@/constants/theme';
 import { detalleLinea, formatearPesos, type LineaDesgloseVista } from '@/lib/cotizador';
 
@@ -9,22 +11,29 @@ type Props = { lineas: readonly LineaDesgloseVista[]; valorTotal: number };
 export function DesgloseCotizacion({ lineas, valorTotal }: Props) {
   return (
     <View>
-      {lineas.map((l) => {
+      {/* Las líneas aparecen una tras otra, como un recibo que se imprime. */}
+      {lineas.map((l, i) => {
         const texto = detalleLinea(l);
         return (
-          <View key={l.concepto} style={styles.fila}>
+          <Animated.View key={l.concepto} entering={entradaLista(i + 1)} style={styles.fila}>
             <View style={styles.concepto}>
               <Text style={styles.descripcion}>{l.descripcion}</Text>
               {texto ? <Text style={styles.detalle}>{texto}</Text> : null}
             </View>
             <Text style={styles.valor}>{formatearPesos(l.subtotal)}</Text>
-          </View>
+          </Animated.View>
         );
       })}
-      <View style={[styles.fila, styles.filaTotal]}>
+      <Animated.View entering={entradaLista(lineas.length + 1)} style={[styles.fila, styles.filaTotal]}>
         <Text style={styles.total}>Total</Text>
-        <Text style={styles.total}>{formatearPesos(valorTotal)}</Text>
-      </View>
+        <Animated.Text
+          entering={ZoomIn.duration(Duracion.lenta)
+            .delay(Math.min(lineas.length + 2, 7) * 50)
+            .springify()}
+          style={styles.total}>
+          {formatearPesos(valorTotal)}
+        </Animated.Text>
+      </Animated.View>
     </View>
   );
 }

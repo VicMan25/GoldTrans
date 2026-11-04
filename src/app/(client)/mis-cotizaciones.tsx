@@ -1,10 +1,11 @@
 import { Link, router, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { AccesoRapido } from '@/components/acceso-rapido';
 import { AccionesCompartir } from '@/components/acciones-compartir';
 import { Boton } from '@/components/boton';
+import { CargandoPuntos } from '@/components/cargando';
 import { DesgloseCotizacion } from '@/components/desglose-cotizacion';
 import { EstadoSolicitudTexto } from '@/components/estado-solicitud';
 import { InicioRol } from '@/components/inicio-rol';
@@ -72,7 +73,7 @@ export default function MisCotizaciones() {
       }>
       {cotizaciones.length ? <Text style={styles.seccion}>Tus cotizaciones</Text> : null}
       <Mensaje texto={error} />
-      {cargando ? <ActivityIndicator color={Colors.primary} /> : null}
+      {cargando ? <CargandoPuntos /> : null}
 
       {cotizaciones.map((c) => {
         const expandida = abierta === c.id;

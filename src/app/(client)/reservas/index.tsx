@@ -1,8 +1,9 @@
 import { Link, router, useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
 
 import { Boton } from '@/components/boton';
+import { conEntrada, EsqueletoLista } from '@/components/cargando';
 import { EstadoReservaTexto } from '@/components/estado-reserva';
 import { EstadoVacio } from '@/components/estado-vacio';
 import { Mensaje } from '@/components/mensaje';
@@ -69,7 +70,7 @@ export default function MisReservas() {
       }
       ListEmptyComponent={
         cargando ? (
-          <ActivityIndicator color={Colors.primary} />
+          <EsqueletoLista />
         ) : (
           <EstadoVacio
             icono="ticket-outline"
@@ -77,7 +78,7 @@ export default function MisReservas() {
           />
         )
       }
-      renderItem={({ item: r }) => {
+      renderItem={conEntrada(({ item: r }) => {
         const estado = estadoVisible(r, r.abonos);
         const pagos = resumenPagos(r, r.abonos);
         return (
@@ -112,7 +113,7 @@ export default function MisReservas() {
             </View>
           </Pressable>
         );
-      }}
+      })}
     />
   );
 }

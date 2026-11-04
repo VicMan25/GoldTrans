@@ -1,8 +1,10 @@
 import type { ReactNode } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import Animated from 'react-native-reanimated';
 
 import { EstadoVacio } from '@/components/estado-vacio';
 import { PantallaFormulario } from '@/components/pantalla-formulario';
+import { entradaBloque } from '@/constants/animaciones';
 import { Colors, Radius, Spacing } from '@/constants/theme';
 import { useAuth } from '@/hooks/use-auth';
 import { ETIQUETA_ROL } from '@/lib/roles';
@@ -22,7 +24,7 @@ export function InicioRol({ vacio, accesos, children }: Props) {
 
   return (
     <PantallaFormulario margenSuperior={false}>
-      <View style={styles.saludo}>
+      <Animated.View entering={entradaBloque()} style={styles.saludo}>
         <Text style={styles.hola}>Hola,</Text>
         <Text style={styles.nombre} numberOfLines={2}>
           {nombre}
@@ -30,12 +32,18 @@ export function InicioRol({ vacio, accesos, children }: Props) {
         <View style={styles.rol}>
           <Text style={styles.rolTexto}>{ETIQUETA_ROL[rol]}</Text>
         </View>
-      </View>
-      {accesos ? <View style={styles.accesos}>{accesos}</View> : null}
+      </Animated.View>
+      {accesos ? (
+        <Animated.View entering={entradaBloque(90)} style={styles.accesos}>
+          {accesos}
+        </Animated.View>
+      ) : null}
       {vacio ? (
         <EstadoVacio icono="document-text-outline" texto={vacio} />
       ) : null}
-      <View style={styles.contenido}>{children}</View>
+      <Animated.View entering={entradaBloque(180)} style={styles.contenido}>
+        {children}
+      </Animated.View>
     </PantallaFormulario>
   );
 }
