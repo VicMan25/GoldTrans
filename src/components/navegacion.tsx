@@ -2,7 +2,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { router, type Stack, type Tabs } from 'expo-router';
 import type { ComponentProps } from 'react';
 import { Platform, Pressable, StyleSheet, type ColorValue } from 'react-native';
-import Animated from 'react-native-reanimated';
+import Animated, { type CSSTransitionProperties } from 'react-native-reanimated';
 
 import type { NombreIcono } from '@/components/boton';
 import { Logo } from '@/components/logo';
@@ -109,7 +109,7 @@ export function iconoPestana(nombre: string) {
   function Icono({ color, focused, size }: { color: ColorValue; focused: boolean; size: number }) {
     const icono = (focused ? nombre : `${nombre}-outline`) as NombreIcono;
     return (
-      <Animated.View style={[styles.icono, focused && styles.iconoActivo]}>
+      <Animated.View style={[transicionIcono, focused && styles.iconoActivo]}>
         <Ionicons name={icono} size={size - 2} color={color as string} />
       </Animated.View>
     );
@@ -117,16 +117,18 @@ export function iconoPestana(nombre: string) {
   return Icono;
 }
 
+// Las transiciones CSS de Reanimated no son parte de ViewStyle: van fuera de StyleSheet.create.
+const transicionIcono: CSSTransitionProperties = {
+  transitionProperty: 'transform',
+  transitionDuration: 220,
+  transitionTimingFunction: 'ease-out',
+};
+
 const styles = StyleSheet.create({
   logo: { paddingLeft: Spacing.md },
   // En web el encabezado de pila no deja margen al elemento de la izquierda; en móvil sí.
   enPila: { paddingLeft: Platform.OS === 'web' ? Spacing.md : 0, paddingRight: Spacing.sm },
   atras: { marginLeft: Platform.OS === 'web' ? Spacing.sm : 0, padding: 4, borderRadius: 8 },
   presionado: { opacity: 0.6 },
-  icono: {
-    transitionProperty: 'transform',
-    transitionDuration: 220,
-    transitionTimingFunction: 'ease-out',
-  },
   iconoActivo: { transform: [{ scale: 1.12 }, { translateY: -1 }] },
 });
