@@ -46,6 +46,13 @@
       "typedRoutes": true,
       "reactCompiler": true
     },
-    "primaryColor": "#1A4294"
+    "primaryColor": "#1A4294",
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "e41395da-1346-4cc0-99de-27e0e20249f8"
+      }
+    },
+    "owner": "vicman225"
   }
 }
