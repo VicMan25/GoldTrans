@@ -1,10 +1,12 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Link, router } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
+import Animated, { FadeInUp } from 'react-native-reanimated';
 
 import { AccionesCompartir } from '@/components/acciones-compartir';
 import { Boton } from '@/components/boton';
+import { EsqueletoLista } from '@/components/cargando';
 import { CampoFecha } from '@/components/campo-fecha';
 import { CampoTexto } from '@/components/campo-texto';
 import { DesgloseCotizacion } from '@/components/desglose-cotizacion';
@@ -12,6 +14,7 @@ import { Mensaje } from '@/components/mensaje';
 import { ModalSolicitud } from '@/components/modal-solicitud';
 import { PantallaFormulario } from '@/components/pantalla-formulario';
 import { SelectorOpciones } from '@/components/selector-opciones';
+import { Duracion } from '@/constants/animaciones';
 import { Colors, Radius, Sombra, Spacing } from '@/constants/theme';
 import { useAuth } from '@/hooks/use-auth';
 import { desdeRespuesta, destinatarioDesdePerfil, hablarConAsesor } from '@/lib/compartir';
@@ -143,7 +146,7 @@ export default function Cotizador() {
       }
       margenSuperior={false}>
       {cargandoRutas ? (
-        <ActivityIndicator style={styles.espacio} color={Colors.primary} />
+        <EsqueletoLista filas={2} />
       ) : rutas.length === 0 ? (
         <Mensaje texto={error ?? 'Aún no hay rutas disponibles para cotizar. Contacta a GOLDTRANS.'} />
       ) : (
@@ -212,7 +215,8 @@ export default function Cotizador() {
           <Mensaje texto={error} />
           <Boton titulo="Calcular cotización" icono="calculator-outline" onPress={calcular} cargando={cotizando} />
 
-          {resultado ? <Resultado cotizacion={resultado} rol={rol} /> : null}
+          {/* key: cada cálculo nuevo vuelve a reproducir la entrada del resultado. */}
+          {resultado ? <Resultado key={resultado.id} cotizacion={resultado} rol={rol} /> : null}
         </>
       )}
     </PantallaFormulario>
@@ -228,7 +232,10 @@ function Resultado({ cotizacion: c, rol }: { cotizacion: Cotizacion; rol: Rol })
   const fechas = c.fecha_fin === c.fecha_inicio ? c.fecha_inicio : `${c.fecha_inicio} al ${c.fecha_fin}`;
 
   return (
-    <View style={styles.resultado} accessibilityLiveRegion="polite">
+    <Animated.View
+      entering={FadeInUp.duration(Duracion.lenta).springify().damping(18)}
+      style={styles.resultado}
+      accessibilityLiveRegion="polite">
       <View style={styles.cabecera}>
         <Text style={styles.codigo}>Cotización {c.codigo}</Text>
         <Text style={styles.ruta}>
@@ -299,12 +306,11 @@ function Resultado({ cotizacion: c, rol }: { cotizacion: Cotizacion; rol: Rol })
           />
         </>
       ) : null}
-    </View>
+    </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
-  espacio: { marginVertical: Spacing.lg },
   error: { color: Colors.danger, fontSize: 13, marginTop: -Spacing.sm, marginBottom: Spacing.md },
   ayuda: { fontSize: 13, color: Colors.muted, marginTop: -Spacing.sm, marginBottom: Spacing.md },
   resultado: {

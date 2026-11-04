@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import {
-  ActivityIndicator,
   FlatList,
   Modal,
   Pressable,
@@ -12,6 +11,7 @@ import {
 
 import { Boton } from '@/components/boton';
 import { CampoTexto } from '@/components/campo-texto';
+import { conEntrada, EsqueletoLista } from '@/components/cargando';
 import { EstadoVacio } from '@/components/estado-vacio';
 import { Mensaje } from '@/components/mensaje';
 import { PantallaFormulario } from '@/components/pantalla-formulario';
@@ -82,12 +82,12 @@ export default function Rutas() {
         }
         ListEmptyComponent={
           cargando ? (
-            <ActivityIndicator color={Colors.primary} />
+            <EsqueletoLista />
           ) : (
             <EstadoVacio icono="map-outline" texto="Aún no hay rutas registradas." />
           )
         }
-        renderItem={({ item: r }) => (
+        renderItem={conEntrada(({ item: r }) => (
           <Pressable
             accessibilityRole="button"
             accessibilityHint="Editar ruta"
@@ -107,7 +107,7 @@ export default function Rutas() {
               {r.peajes > 0 ? ` · Peajes ${formatearPesos(r.peajes)} (incluidos)` : ''}
             </Text>
           </Pressable>
-        )}
+        ))}
       />
 
       <Modal

@@ -1,6 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import {
-  ActivityIndicator,
   FlatList,
   Linking,
   Modal,
@@ -13,6 +12,7 @@ import {
 
 import { Boton } from '@/components/boton';
 import { CampoTexto } from '@/components/campo-texto';
+import { CargandoPuntos, conEntrada, EsqueletoLista } from '@/components/cargando';
 import { EstadoAbonoTexto, EstadoReservaTexto } from '@/components/estado-reserva';
 import { EstadoVacio } from '@/components/estado-vacio';
 import { Mensaje } from '@/components/mensaje';
@@ -107,7 +107,7 @@ export function BandejaReservas({ encabezado }: { encabezado?: ReactNode }) {
         }
         ListEmptyComponent={
           cargando ? (
-            <ActivityIndicator color={Colors.primary} />
+            <EsqueletoLista />
           ) : (
             <EstadoVacio
               icono="wallet-outline"
@@ -115,7 +115,7 @@ export function BandejaReservas({ encabezado }: { encabezado?: ReactNode }) {
             />
           )
         }
-        renderItem={({ item: r }) => {
+        renderItem={conEntrada(({ item: r }) => {
           const pendientes = r.abonos.filter((a) => a.estado === 'pendiente').length;
           const estado = estadoVisible(r, r.abonos);
           return (
@@ -148,7 +148,7 @@ export function BandejaReservas({ encabezado }: { encabezado?: ReactNode }) {
               </View>
             </Pressable>
           );
-        }}
+        })}
       />
 
       <Modal
@@ -201,7 +201,7 @@ function DetalleReserva({ reservaId, onCerrar }: { reservaId: string; onCerrar: 
   if (!reserva) {
     return (
       <PantallaFormulario titulo="Reserva">
-        {error ? <Mensaje texto={error} /> : <ActivityIndicator color={Colors.primary} />}
+        {error ? <Mensaje texto={error} /> : <CargandoPuntos />}
         <Boton titulo="Cerrar" variante="secundario" onPress={onCerrar} />
       </PantallaFormulario>
     );

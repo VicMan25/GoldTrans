@@ -1,6 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import {
-  ActivityIndicator,
   FlatList,
   Linking,
   Modal,
@@ -13,6 +12,7 @@ import {
 
 import { Boton } from '@/components/boton';
 import { CampoTexto } from '@/components/campo-texto';
+import { conEntrada, EsqueletoLista } from '@/components/cargando';
 import { DesgloseCotizacion } from '@/components/desglose-cotizacion';
 import { EstadoSolicitudTexto } from '@/components/estado-solicitud';
 import { EstadoVacio } from '@/components/estado-vacio';
@@ -104,7 +104,7 @@ export function BandejaSolicitudes({ encabezado }: { encabezado?: ReactNode }) {
         }
         ListEmptyComponent={
           cargando ? (
-            <ActivityIndicator color={Colors.primary} />
+            <EsqueletoLista />
           ) : (
             <EstadoVacio
               icono="clipboard-outline"
@@ -112,7 +112,7 @@ export function BandejaSolicitudes({ encabezado }: { encabezado?: ReactNode }) {
             />
           )
         }
-        renderItem={({ item: s }) => {
+        renderItem={conEntrada(({ item: s }) => {
           const c = s.cotizacion;
           return (
             <Pressable
@@ -139,7 +139,7 @@ export function BandejaSolicitudes({ encabezado }: { encabezado?: ReactNode }) {
               </View>
             </Pressable>
           );
-        }}
+        })}
       />
 
       <Modal

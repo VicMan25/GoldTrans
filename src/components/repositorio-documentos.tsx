@@ -1,10 +1,11 @@
 import { useEffect, useState, type ReactNode } from 'react';
-import { ActivityIndicator, FlatList, Modal, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Modal, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
 
 import { AlertasVencimiento } from '@/components/alertas-vencimiento';
 import { Boton } from '@/components/boton';
 import { CampoFecha } from '@/components/campo-fecha';
 import { CampoTexto } from '@/components/campo-texto';
+import { conEntrada, EsqueletoLista } from '@/components/cargando';
 import { EstadoVacio } from '@/components/estado-vacio';
 import { COLOR_VIGENCIA, EstadoVigenciaTexto } from '@/components/estado-vigencia';
 import { Mensaje } from '@/components/mensaje';
@@ -143,7 +144,7 @@ export function RepositorioDocumentos({ encabezado }: { encabezado?: ReactNode }
         }
         ListEmptyComponent={
           cargando ? (
-            <ActivityIndicator color={Colors.primary} />
+            <EsqueletoLista />
           ) : (
             <EstadoVacio
               icono="folder-open-outline"
@@ -151,7 +152,7 @@ export function RepositorioDocumentos({ encabezado }: { encabezado?: ReactNode }
             />
           )
         }
-        renderItem={({ item: d }) => {
+        renderItem={conEntrada(({ item: d }) => {
           const v = versionActual(d);
           const e = estadoDocumento(d, hoy);
           return (
@@ -182,7 +183,7 @@ export function RepositorioDocumentos({ encabezado }: { encabezado?: ReactNode }
               ) : null}
             </Pressable>
           );
-        }}
+        })}
       />
 
       <Modal

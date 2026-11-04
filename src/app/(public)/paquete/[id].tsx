@@ -3,7 +3,6 @@ import { Image } from 'expo-image';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
-  ActivityIndicator,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -13,6 +12,7 @@ import {
 } from 'react-native';
 
 import { Boton } from '@/components/boton';
+import { CargandoPuntos } from '@/components/cargando';
 import { Insignia, type Tono } from '@/components/insignia';
 import { Mensaje } from '@/components/mensaje';
 import { Colors, Radius, Sombra, Spacing } from '@/constants/theme';
@@ -64,7 +64,7 @@ export default function FichaPaquete() {
   if (!paquete) {
     return (
       <View style={styles.centro}>
-        {error ? <Mensaje texto={error} /> : <ActivityIndicator color={Colors.primary} />}
+        {error ? <Mensaje texto={error} /> : <CargandoPuntos />}
       </View>
     );
   }

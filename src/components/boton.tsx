@@ -1,6 +1,8 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { ActivityIndicator, Pressable, StyleSheet, Text, View, type PressableProps } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, Text, type PressableProps } from 'react-native';
+import Animated from 'react-native-reanimated';
 
+import { ESCALA_PRESIONADO, entradaSuave, transicionPresion } from '@/constants/animaciones';
 import { Colors, Radius, Spacing } from '@/constants/theme';
 
 type Variante = 'primario' | 'acento' | 'secundario' | 'texto' | 'peligro';
@@ -27,22 +29,25 @@ export function Boton({ titulo, variante = 'primario', cargando, disabled, icono
       // y un style en forma de función dejaría de aplicarse.
       style={styles.contenedor}>
       {({ pressed }) => (
-        <View
+        <Animated.View
           style={[
             styles.base,
             contenedor[variante],
+            transicionPresion,
             pressed && (variante === 'texto' ? styles.textoPresionado : styles.presionado),
             inactivo && styles.inactivo,
           ]}>
           {cargando ? (
-            <ActivityIndicator color={color} />
+            <Animated.View key="cargando" entering={entradaSuave}>
+              <ActivityIndicator color={color} />
+            </Animated.View>
           ) : (
-            <View style={styles.fila}>
+            <Animated.View key="contenido" entering={entradaSuave} style={styles.fila}>
               {icono ? <Ionicons name={icono} size={19} color={color} /> : null}
               <Text style={[styles.texto, { color }]}>{titulo}</Text>
-            </View>
+            </Animated.View>
           )}
-        </View>
+        </Animated.View>
       )}
     </Pressable>
   );
@@ -67,8 +72,8 @@ const styles = StyleSheet.create({
   },
   fila: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm },
   texto: { fontSize: 16, fontWeight: '700', textAlign: 'center' },
-  presionado: { opacity: 0.85, transform: [{ scale: 0.99 }] },
-  textoPresionado: { backgroundColor: Colors.surface },
+  presionado: { opacity: 0.88, transform: [{ scale: ESCALA_PRESIONADO }] },
+  textoPresionado: { backgroundColor: Colors.surface, transform: [{ scale: ESCALA_PRESIONADO }] },
   inactivo: { opacity: 0.5 },
 });
 

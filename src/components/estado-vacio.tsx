@@ -1,18 +1,20 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text } from 'react-native';
+import Animated, { ZoomIn } from 'react-native-reanimated';
 
 import type { NombreIcono } from '@/components/boton';
+import { Duracion, entradaBloque } from '@/constants/animaciones';
 import { Colors, Radius, Spacing } from '@/constants/theme';
 
 /** Lista vacía: ícono + mensaje, para que no parezca un error de carga. */
 export function EstadoVacio({ icono = 'file-tray-outline', texto }: { icono?: NombreIcono; texto: string }) {
   return (
-    <View style={styles.caja}>
-      <View style={styles.icono}>
+    <Animated.View entering={entradaBloque()} style={styles.caja}>
+      <Animated.View entering={ZoomIn.duration(Duracion.lenta).delay(120).springify()} style={styles.icono}>
         <Ionicons name={icono} size={30} color={Colors.primary} />
-      </View>
+      </Animated.View>
       <Text style={styles.texto}>{texto}</Text>
-    </View>
+    </Animated.View>
   );
 }
 

@@ -2,6 +2,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { router, type Stack, type Tabs } from 'expo-router';
 import type { ComponentProps } from 'react';
 import { Platform, Pressable, StyleSheet, type ColorValue } from 'react-native';
+import Animated from 'react-native-reanimated';
 
 import type { NombreIcono } from '@/components/boton';
 import { Logo } from '@/components/logo';
@@ -37,6 +38,8 @@ export const opcionesPestanas: BottomTabNavigationOptions = {
   tabBarStyle: { borderTopColor: Colors.border, backgroundColor: Colors.background },
   tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
   sceneStyle: { backgroundColor: Colors.page },
+  // Desliza levemente la pantalla al cambiar de pestaña.
+  animation: 'shift',
 };
 
 /** Vuelve a la pantalla principal del rol cerrando lo que haya encima (o la abre si no está). */
@@ -101,11 +104,15 @@ export function opcionesPila({ route, navigation }: PropsPila): NativeStackNavig
   };
 }
 
-/** Ícono de pestaña: contorno inactivo, relleno cuando está activa. */
+/** Ícono de pestaña: contorno inactivo, relleno y un poco más grande cuando está activa. */
 export function iconoPestana(nombre: string) {
   function Icono({ color, focused, size }: { color: ColorValue; focused: boolean; size: number }) {
     const icono = (focused ? nombre : `${nombre}-outline`) as NombreIcono;
-    return <Ionicons name={icono} size={size - 2} color={color as string} />;
+    return (
+      <Animated.View style={[styles.icono, focused && styles.iconoActivo]}>
+        <Ionicons name={icono} size={size - 2} color={color as string} />
+      </Animated.View>
+    );
   }
   return Icono;
 }
@@ -116,4 +123,10 @@ const styles = StyleSheet.create({
   enPila: { paddingLeft: Platform.OS === 'web' ? Spacing.md : 0, paddingRight: Spacing.sm },
   atras: { marginLeft: Platform.OS === 'web' ? Spacing.sm : 0, padding: 4, borderRadius: 8 },
   presionado: { opacity: 0.6 },
+  icono: {
+    transitionProperty: 'transform',
+    transitionDuration: 220,
+    transitionTimingFunction: 'ease-out',
+  },
+  iconoActivo: { transform: [{ scale: 1.12 }, { translateY: -1 }] },
 });

@@ -2,9 +2,10 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { CampoTexto } from '@/components/campo-texto';
+import { conEntrada, EsqueletoLista } from '@/components/cargando';
 import { EstadoVacio } from '@/components/estado-vacio';
 import { Insignia } from '@/components/insignia';
 import { Mensaje } from '@/components/mensaje';
@@ -97,7 +98,7 @@ export default function Catalogo() {
       }
       ListEmptyComponent={
         cargando ? (
-          <ActivityIndicator color={Colors.primary} />
+          <EsqueletoLista variante="foto" />
         ) : error ? null : (
           <EstadoVacio
             icono={paquetes.length === 0 ? 'earth-outline' : 'search-outline'}
@@ -109,7 +110,7 @@ export default function Catalogo() {
           />
         )
       }
-      renderItem={({ item: p }) => {
+      renderItem={conEntrada(({ item: p }) => {
         const salida = proximaSalida(p, hoy);
         const foto = portada(p);
         return (
@@ -150,7 +151,7 @@ export default function Catalogo() {
             </View>
           </Pressable>
         );
-      }}
+      })}
     />
   );
 }

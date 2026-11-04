@@ -1,10 +1,11 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 import { Boton } from '@/components/boton';
 import { CampoFecha } from '@/components/campo-fecha';
 import { CampoTexto } from '@/components/campo-texto';
+import { CargandoPuntos } from '@/components/cargando';
 import { Mensaje } from '@/components/mensaje';
 import { PantallaFormulario } from '@/components/pantalla-formulario';
 import { SelectorOpciones } from '@/components/selector-opciones';
@@ -78,7 +79,7 @@ export default function NuevaReserva() {
         ) : paquete ? (
           <Mensaje texto="Esta fecha de salida ya no admite reservas. Vuelve a la ficha del paquete y elige otra." />
         ) : (
-          <ActivityIndicator color={Colors.primary} />
+          <CargandoPuntos />
         )}
       </View>
     );

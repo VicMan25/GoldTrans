@@ -1,8 +1,9 @@
 import { Image } from 'expo-image';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 import { Boton } from '@/components/boton';
+import { CargandoPuntos } from '@/components/cargando';
 import { Colors, Radius, Spacing } from '@/constants/theme';
 import { abrirArchivo, urlFirmada } from '@/lib/archivos';
 import type { Abono } from '@/lib/reservas';
@@ -46,7 +47,7 @@ export function VistaComprobante({ abono }: { abono: Pick<Abono, 'comprobante_ru
             accessibilityLabel="Comprobante de transferencia"
           />
         ) : !error ? (
-          <ActivityIndicator color={Colors.primary} style={styles.cargando} />
+          <CargandoPuntos />
         ) : null
       ) : null}
       {error ? <Text style={styles.error}>{error}</Text> : null}

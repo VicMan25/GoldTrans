@@ -1,9 +1,10 @@
 import { Image } from 'expo-image';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
 
 import { Boton } from '@/components/boton';
+import { conEntrada, EsqueletoLista } from '@/components/cargando';
 import { EstadoVacio } from '@/components/estado-vacio';
 import { Mensaje } from '@/components/mensaje';
 import { Colors, Radius, Spacing } from '@/constants/theme';
@@ -68,12 +69,12 @@ export default function Paquetes() {
       }
       ListEmptyComponent={
         cargando ? (
-          <ActivityIndicator color={Colors.primary} />
+          <EsqueletoLista variante="foto" />
         ) : (
           <EstadoVacio icono="earth-outline" texto="Aún no hay paquetes turísticos." />
         )
       }
-      renderItem={({ item: p }) => {
+      renderItem={conEntrada(({ item: p }) => {
         const foto = portada(p);
         const publicado = p.activo && p.imagenes.length > 0;
         const salida = proximaSalida(p, hoy);
@@ -103,7 +104,7 @@ export default function Paquetes() {
             </View>
           </Pressable>
         );
-      }}
+      })}
     />
   );
 }

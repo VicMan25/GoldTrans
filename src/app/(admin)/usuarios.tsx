@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, FlatList, RefreshControl, StyleSheet, Text, View } from 'react-native';
+import { FlatList, RefreshControl, StyleSheet, Text, View } from 'react-native';
 
 import { Boton } from '@/components/boton';
 import { CampoTexto } from '@/components/campo-texto';
+import { conEntrada, EsqueletoLista } from '@/components/cargando';
 import { EstadoVacio } from '@/components/estado-vacio';
 import { Mensaje } from '@/components/mensaje';
 import { SelectorOpciones } from '@/components/selector-opciones';
@@ -84,12 +85,12 @@ export default function Usuarios() {
       }
       ListEmptyComponent={
         cargando ? (
-          <ActivityIndicator color={Colors.primary} />
+          <EsqueletoLista />
         ) : (
           <EstadoVacio icono="people-outline" texto="No hay usuarios que coincidan." />
         )
       }
-      renderItem={({ item: u }) => {
+      renderItem={conEntrada(({ item: u }) => {
         const esYo = u.id === yo?.id;
         const p = u.perfil;
         return (
@@ -126,7 +127,7 @@ export default function Usuarios() {
             ) : null}
           </View>
         );
-      }}
+      })}
     />
   );
 }
