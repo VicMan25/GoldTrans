@@ -398,12 +398,14 @@ function DetalleProceso({
     setVersion((v) => v + 1);
   }
 
-  async function ejecutar(accion: () => Promise<{ ok: boolean; error?: string }>, mensaje?: string) {
+  /** Devuelve true si la acción se guardó. */
+  async function ejecutar(accion: () => Promise<{ ok: boolean; error?: string }>, mensaje?: string): Promise<boolean> {
     setOcupado(true);
     const r = await accion();
     setOcupado(false);
     if (r.ok) recargar(mensaje);
     else toast.error(r.error ?? 'No se pudo completar la acción');
+    return r.ok;
   }
 
   async function eliminar() {
@@ -429,7 +431,7 @@ function DetalleProceso({
       {responsable ? <Text style={styles.detalle}>Responsable: {responsable.nombre}</Text> : null}
       {p.notas ? <Text style={styles.nota}>{p.notas}</Text> : null}
       {p.enlace ? (
-        <Boton titulo="Abrir en SECOP" variante="texto" onPress={() => Linking.openURL(p.enlace ?? '').catch(() => undefined)} />
+        <Boton titulo="Abrir en SECOP" variante="texto" onPress={() => Linking.openURL(p.enlace ?? '').catch(() => toast.error('No se pudo abrir el enlace de SECOP'))} />
       ) : null}
       <Mensaje texto={error} />
 
@@ -526,9 +528,10 @@ function FilaRequisito({
   documentos: DocumentoCompleto[];
   hoy: string;
   ocupado: boolean;
-  onAccion: (accion: () => Promise<{ ok: boolean; error?: string }>, mensaje?: string) => void;
+  onAccion: (accion: () => Promise<{ ok: boolean; error?: string }>, mensaje?: string) => Promise<boolean>;
 }) {
   const [eligiendo, setEligiendo] = useState(false);
+  const [confirmarEliminar, setConfirmarEliminar] = useState(false);
   const [busqueda, setBusqueda] = useState('');
   const d = item.documento;
   const opciones = filtrarDocumentos(documentos, '', busqueda).slice(0, 8);
@@ -600,12 +603,19 @@ function FilaRequisito({
               disabled={ocupado}
             />
           )}
-          <Boton
-            titulo="Eliminar"
-            variante="texto"
-            onPress={() => onAccion(() => eliminarItem(item.id), 'Requisito eliminado')}
-            disabled={ocupado}
-          />
+          {confirmarEliminar ? (
+            <>
+              <Boton
+                titulo="Confirmar eliminación"
+                variante="peligro"
+                onPress={() => onAccion(() => eliminarItem(item.id), 'Requisito eliminado')}
+                cargando={ocupado}
+              />
+              <Boton titulo="No eliminar" variante="texto" onPress={() => setConfirmarEliminar(false)} disabled={ocupado} />
+            </>
+          ) : (
+            <Boton titulo="Eliminar" variante="texto" onPress={() => setConfirmarEliminar(true)} disabled={ocupado} />
+          )}
         </View>
       )}
     </View>
@@ -616,7 +626,7 @@ function NuevoRequisito({
   onAgregar,
   ocupado,
 }: {
-  onAgregar: (requisito: string, obligatorio: boolean) => void;
+  onAgregar: (requisito: string, obligatorio: boolean) => Promise<boolean>;
   ocupado: boolean;
 }) {
   const [requisito, setRequisito] = useState('');
@@ -642,9 +652,9 @@ function NuevoRequisito({
         titulo="Agregar requisito"
         variante="secundario"
         disabled={ocupado || !requisito.trim()}
-        onPress={() => {
-          onAgregar(requisito, obligatorio === 'si');
-          setRequisito('');
+        onPress={async () => {
+          // Solo se limpia si se guardó: ante un error, el texto escrito no se pierde.
+          if (await onAgregar(requisito, obligatorio === 'si')) setRequisito('');
         }}
       />
     </View>

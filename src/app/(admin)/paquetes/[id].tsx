@@ -219,6 +219,7 @@ function DatosPaquete({
 
 function Fotos({ paquete, onCambio }: { paquete: PaqueteCompleto; onCambio: () => void }) {
   const [elegida, setElegida] = useState<ImagenPaquete | null>(null);
+  const [confirmarEliminar, setConfirmarEliminar] = useState(false);
   const [ocupado, setOcupado] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const toast = useToast();
@@ -230,6 +231,7 @@ function Fotos({ paquete, onCambio }: { paquete: PaqueteCompleto; onCambio: () =
     setOcupado(false);
     if (r.ok) {
       setElegida(null);
+      setConfirmarEliminar(false);
       toast.exito(mensaje);
       onCambio();
     } else setError(r.error ?? 'No se pudo completar la acción');
@@ -263,7 +265,10 @@ function Fotos({ paquete, onCambio }: { paquete: PaqueteCompleto; onCambio: () =
             key={img.id}
             accessibilityRole="button"
             accessibilityLabel={i === 0 ? 'Foto de portada' : `Foto ${i + 1}`}
-            onPress={() => setElegida(elegida?.id === img.id ? null : img)}>
+            onPress={() => {
+              setElegida(elegida?.id === img.id ? null : img);
+              setConfirmarEliminar(false);
+            }}>
             <Image
               source={urlImagen(img.ruta)}
               style={[styles.miniatura, elegida?.id === img.id && styles.miniaturaElegida]}
@@ -283,7 +288,19 @@ function Fotos({ paquete, onCambio }: { paquete: PaqueteCompleto; onCambio: () =
               onPress={() => ejecutar(() => hacerPortada(elegida, paquete.imagenes), 'Portada actualizada')}
             />
           ) : null}
-          <Boton titulo="Eliminar foto" variante="peligro" cargando={ocupado} onPress={() => ejecutar(() => eliminarImagen(elegida), 'Foto eliminada')} />
+          {confirmarEliminar ? (
+            <>
+              <Boton
+                titulo="Confirmar: eliminar foto"
+                variante="peligro"
+                cargando={ocupado}
+                onPress={() => ejecutar(() => eliminarImagen(elegida), 'Foto eliminada')}
+              />
+              <Boton titulo="No eliminar" variante="texto" onPress={() => setConfirmarEliminar(false)} disabled={ocupado} />
+            </>
+          ) : (
+            <Boton titulo="Eliminar foto" variante="peligro" onPress={() => setConfirmarEliminar(true)} disabled={ocupado} />
+          )}
         </View>
       ) : null}
       <Mensaje texto={error} />
@@ -356,6 +373,7 @@ function FormularioDiaModal({
   const [errores, setErrores] = useState<Errores<keyof FormularioDia>>({});
   const [error, setError] = useState<string | null>(null);
   const [guardando, setGuardando] = useState(false);
+  const [confirmarEliminar, setConfirmarEliminar] = useState(false);
   const toast = useToast();
 
   async function guardar() {
@@ -363,6 +381,7 @@ function FormularioDiaModal({
     setErrores(nuevos);
     if (!sinErrores(nuevos)) return;
     setGuardando(true);
+    setError(null);
     const r = await guardarDia(paquete.id, datos, dia?.id);
     setGuardando(false);
     if (r.ok) {
@@ -375,6 +394,7 @@ function FormularioDiaModal({
   async function eliminar() {
     if (!dia) return;
     setGuardando(true);
+    setError(null);
     const r = await eliminarDia(dia.id);
     setGuardando(false);
     if (r.ok) {
@@ -411,7 +431,13 @@ function FormularioDiaModal({
       <View style={styles.botones}>
         <Boton titulo="Guardar" onPress={guardar} cargando={guardando} />
         <Boton titulo="Cancelar" variante="secundario" onPress={onCerrar} disabled={guardando} />
-        {dia ? <Boton titulo="Eliminar día" variante="texto" onPress={eliminar} disabled={guardando} /> : null}
+        {dia ? (
+          confirmarEliminar ? (
+            <Boton titulo="Confirmar eliminación" variante="peligro" onPress={eliminar} cargando={guardando} />
+          ) : (
+            <Boton titulo="Eliminar día" variante="texto" onPress={() => setConfirmarEliminar(true)} disabled={guardando} />
+          )
+        ) : null}
       </View>
     </PantallaFormulario>
   );
@@ -493,6 +519,7 @@ function FormularioFechaModal({
   const [errores, setErrores] = useState<Errores<keyof FormularioFecha>>({});
   const [error, setError] = useState<string | null>(null);
   const [guardando, setGuardando] = useState(false);
+  const [confirmarEliminar, setConfirmarEliminar] = useState(false);
   const toast = useToast();
   const reservados = fecha?.cupos_reservados ?? 0;
 
@@ -512,6 +539,7 @@ function FormularioFechaModal({
     setErrores(nuevos);
     if (!sinErrores(nuevos)) return;
     setGuardando(true);
+    setError(null);
     const r = await guardarFecha(paquete.id, datos, fecha?.id);
     setGuardando(false);
     if (r.ok) {
@@ -524,6 +552,7 @@ function FormularioFechaModal({
   async function eliminar() {
     if (!fecha) return;
     setGuardando(true);
+    setError(null);
     const r = await eliminarFecha(fecha.id);
     setGuardando(false);
     if (r.ok) {
@@ -567,7 +596,13 @@ function FormularioFechaModal({
       <View style={styles.botones}>
         <Boton titulo="Guardar" onPress={guardar} cargando={guardando} />
         <Boton titulo="Cancelar" variante="secundario" onPress={onCerrar} disabled={guardando} />
-        {fecha ? <Boton titulo="Eliminar salida" variante="texto" onPress={eliminar} disabled={guardando} /> : null}
+        {fecha ? (
+          confirmarEliminar ? (
+            <Boton titulo="Confirmar eliminación" variante="peligro" onPress={eliminar} cargando={guardando} />
+          ) : (
+            <Boton titulo="Eliminar salida" variante="texto" onPress={() => setConfirmarEliminar(true)} disabled={guardando} />
+          )
+        ) : null}
       </View>
     </PantallaFormulario>
   );
