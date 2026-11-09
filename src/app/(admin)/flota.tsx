@@ -17,6 +17,7 @@ import { EstadoVacio } from '@/components/estado-vacio';
 import { Mensaje } from '@/components/mensaje';
 import { PantallaFormulario } from '@/components/pantalla-formulario';
 import { SelectorOpciones } from '@/components/selector-opciones';
+import { HostToast, useToast } from '@/components/toast';
 import { Colors, Radius, Spacing } from '@/constants/theme';
 import { sinErrores, type Errores } from '@/lib/validacion';
 import {
@@ -143,6 +144,7 @@ export default function Flota() {
             }}
           />
         ) : null}
+        <HostToast />
       </Modal>
     </>
   );
@@ -164,6 +166,7 @@ function FormularioVehiculoModal({
   const [error, setError] = useState<string | null>(null);
   const [guardando, setGuardando] = useState(false);
   const [confirmarEliminar, setConfirmarEliminar] = useState(false);
+  const toast = useToast();
 
   function cambiar<K extends keyof FormularioVehiculo>(campo: K, valor: FormularioVehiculo[K]) {
     setDatos((d) => ({ ...d, [campo]: valor }));
@@ -178,7 +181,10 @@ function FormularioVehiculoModal({
     setError(null);
     const r = await guardarVehiculo(datos, id);
     setGuardando(false);
-    if (r.ok) onGuardado();
+    if (r.ok) {
+      toast.exito(id ? 'Vehículo actualizado' : 'Vehículo agregado');
+      onGuardado();
+    }
     else setError(r.error);
   }
 
@@ -187,7 +193,10 @@ function FormularioVehiculoModal({
     setGuardando(true);
     const r = await eliminarVehiculo(id);
     setGuardando(false);
-    if (r.ok) onGuardado();
+    if (r.ok) {
+      toast.exito('Vehículo eliminado');
+      onGuardado();
+    }
     else setError(r.error);
   }
 

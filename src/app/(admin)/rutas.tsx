@@ -16,6 +16,7 @@ import { EstadoVacio } from '@/components/estado-vacio';
 import { Mensaje } from '@/components/mensaje';
 import { PantallaFormulario } from '@/components/pantalla-formulario';
 import { SelectorOpciones } from '@/components/selector-opciones';
+import { HostToast, useToast } from '@/components/toast';
 import { Colors, Radius, Spacing } from '@/constants/theme';
 import { formatearDecimal, formatearPesos } from '@/lib/cotizador';
 import {
@@ -126,6 +127,7 @@ export default function Rutas() {
             }}
           />
         ) : null}
+        <HostToast />
       </Modal>
     </>
   );
@@ -147,6 +149,7 @@ function FormularioRutaModal({
   const [error, setError] = useState<string | null>(null);
   const [guardando, setGuardando] = useState(false);
   const [confirmarEliminar, setConfirmarEliminar] = useState(false);
+  const toast = useToast();
 
   function cambiar<K extends keyof FormularioRuta>(campo: K, valor: FormularioRuta[K]) {
     setDatos((d) => ({ ...d, [campo]: valor }));
@@ -161,7 +164,10 @@ function FormularioRutaModal({
     setError(null);
     const r = await guardarRuta(datos, id);
     setGuardando(false);
-    if (r.ok) onGuardado();
+    if (r.ok) {
+      toast.exito(id ? 'Ruta actualizada' : 'Ruta agregada');
+      onGuardado();
+    }
     else setError(r.error);
   }
 
@@ -170,7 +176,10 @@ function FormularioRutaModal({
     setGuardando(true);
     const r = await eliminarRuta(id);
     setGuardando(false);
-    if (r.ok) onGuardado();
+    if (r.ok) {
+      toast.exito('Ruta eliminada');
+      onGuardado();
+    }
     else setError(r.error);
   }
 

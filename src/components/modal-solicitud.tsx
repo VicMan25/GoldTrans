@@ -5,6 +5,7 @@ import { Boton } from '@/components/boton';
 import { CampoTexto } from '@/components/campo-texto';
 import { Mensaje } from '@/components/mensaje';
 import { PantallaFormulario } from '@/components/pantalla-formulario';
+import { HostToast, useToast } from '@/components/toast';
 import { Colors, Spacing } from '@/constants/theme';
 import { useAuth } from '@/hooks/use-auth';
 import { formatearPesos } from '@/lib/cotizador';
@@ -32,6 +33,7 @@ export function ModalSolicitud({ cotizacion, onCerrar, onCreada }: Props) {
       presentationStyle="pageSheet"
       onRequestClose={onCerrar}>
       {cotizacion ? <Formulario cotizacion={cotizacion} onCerrar={onCerrar} onCreada={onCreada} /> : null}
+      <HostToast />
     </Modal>
   );
 }
@@ -53,6 +55,7 @@ function Formulario({
   const [errores, setErrores] = useState<Errores<keyof FormularioSolicitud>>({});
   const [error, setError] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
+  const toast = useToast();
 
   function cambiar(campo: keyof FormularioSolicitud, valor: string) {
     setDatos((d) => ({ ...d, [campo]: valor }));
@@ -67,7 +70,10 @@ function Formulario({
     setError(null);
     const r = await crearSolicitud(c.id, datos);
     setEnviando(false);
-    if (r.ok) onCreada(r.data);
+    if (r.ok) {
+      toast.exito(`Solicitud ${r.data.codigo} enviada. Un asesor la revisará pronto.`);
+      onCreada(r.data);
+    }
     else setError(r.error);
   }
 

@@ -18,6 +18,7 @@ import { EstadoVacio } from '@/components/estado-vacio';
 import { EstadoItemTexto, EstadoVigenciaTexto } from '@/components/estado-vigencia';
 import { Mensaje } from '@/components/mensaje';
 import { PantallaFormulario } from '@/components/pantalla-formulario';
+import { HostToast, useToast } from '@/components/toast';
 import { SelectorOpciones } from '@/components/selector-opciones';
 import { Colors, Radius, Spacing } from '@/constants/theme';
 import { useAuth } from '@/hooks/use-auth';
@@ -220,6 +221,7 @@ export function ProcesosLicitacion({ encabezado }: { encabezado?: ReactNode }) {
             }}
           />
         ) : null}
+        <HostToast />
       </Modal>
     </>
   );
@@ -243,6 +245,7 @@ function FormularioProcesoVista({
   const [errores, setErrores] = useState<Errores<keyof FormularioProceso>>({});
   const [error, setError] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
+  const toast = useToast();
 
   function cambiar(campo: keyof FormularioProceso, valor: string) {
     setDatos((d) => ({ ...d, [campo]: valor }));
@@ -257,7 +260,10 @@ function FormularioProcesoVista({
     setError(null);
     const r = await guardarProceso(datos, proceso?.id);
     setEnviando(false);
-    if (r.ok) onGuardado(r.data.id);
+    if (r.ok) {
+      toast.exito(proceso ? 'Proceso actualizado' : `Proceso ${datos.numero.trim()} creado. Ahora arma su lista de verificación.`);
+      onGuardado(r.data.id);
+    }
     else setError(r.error);
   }
 
@@ -355,11 +361,11 @@ function DetalleProceso({
   const hoy = hoyEnColombia();
   const [proceso, setProceso] = useState<ProcesoCompleto | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [aviso, setAviso] = useState<string | null>(null);
   const [version, setVersion] = useState(0);
   const [editando, setEditando] = useState(false);
   const [confirmarEliminar, setConfirmarEliminar] = useState(false);
   const [ocupado, setOcupado] = useState(false);
+  const toast = useToast();
 
   useEffect(() => {
     let vigente = true;
@@ -387,7 +393,7 @@ function DetalleProceso({
   const responsable = personal.find((u) => u.id === p.responsable_id);
 
   function recargar(mensaje?: string) {
-    setAviso(mensaje ?? null);
+    if (mensaje) toast.exito(mensaje);
     setError(null);
     setVersion((v) => v + 1);
   }
@@ -397,14 +403,17 @@ function DetalleProceso({
     const r = await accion();
     setOcupado(false);
     if (r.ok) recargar(mensaje);
-    else setError(r.error ?? 'No se pudo completar la acción');
+    else toast.error(r.error ?? 'No se pudo completar la acción');
   }
 
   async function eliminar() {
     setOcupado(true);
     const r = await eliminarProceso(p.id);
     setOcupado(false);
-    if (r.ok) onCerrar();
+    if (r.ok) {
+      toast.exito(`Proceso ${p.numero} eliminado`);
+      onCerrar();
+    }
     else setError(r.error);
   }
 
@@ -422,7 +431,6 @@ function DetalleProceso({
       {p.enlace ? (
         <Boton titulo="Abrir en SECOP" variante="texto" onPress={() => Linking.openURL(p.enlace ?? '').catch(() => undefined)} />
       ) : null}
-      <Mensaje tipo="exito" texto={aviso} />
       <Mensaje texto={error} />
 
       <Text style={styles.seccion}>Cumplimiento</Text>
@@ -461,7 +469,10 @@ function DetalleProceso({
       ))}
       <NuevoRequisito
         onAgregar={(requisito, obligatorio) =>
-          ejecutar(() => agregarItems(p.id, [{ requisito, obligatorio }], items.length ? items[items.length - 1].orden + 1 : 0))
+          ejecutar(
+            () => agregarItems(p.id, [{ requisito, obligatorio }], items.length ? items[items.length - 1].orden + 1 : 0),
+            'Requisito agregado',
+          )
         }
         ocupado={ocupado}
       />
@@ -477,7 +488,7 @@ function DetalleProceso({
           onCerrar={() => setEditando(false)}
           onGuardado={() => {
             setEditando(false);
-            recargar('Proceso actualizado.');
+            recargar();
           }}
         />
       ) : (
@@ -550,7 +561,7 @@ function FilaRequisito({
               accessibilityRole="button"
               onPress={() => {
                 setEligiendo(false);
-                onAccion(() => actualizarItem(item.id, { documento_id: doc.id }));
+                onAccion(() => actualizarItem(item.id, { documento_id: doc.id }), `Documento «${doc.nombre}» vinculado`);
               }}
               style={({ pressed }) => [styles.opcionDoc, pressed && styles.presionada]}>
               <Text style={styles.opcionTexto} numberOfLines={1}>
@@ -573,21 +584,26 @@ function FilaRequisito({
             <Boton
               titulo="Quitar documento"
               variante="texto"
-              onPress={() => onAccion(() => actualizarItem(item.id, { documento_id: null }))}
+              onPress={() => onAccion(() => actualizarItem(item.id, { documento_id: null }), 'Documento desvinculado')}
               disabled={ocupado}
             />
           ) : (
             <Boton
               titulo={item.cumplido_manual ? 'Desmarcar' : 'Marcar cumplido'}
               variante="texto"
-              onPress={() => onAccion(() => actualizarItem(item.id, { cumplido_manual: !item.cumplido_manual }))}
+              onPress={() =>
+                onAccion(
+                  () => actualizarItem(item.id, { cumplido_manual: !item.cumplido_manual }),
+                  item.cumplido_manual ? 'Requisito desmarcado' : 'Requisito marcado como cumplido',
+                )
+              }
               disabled={ocupado}
             />
           )}
           <Boton
             titulo="Eliminar"
             variante="texto"
-            onPress={() => onAccion(() => eliminarItem(item.id))}
+            onPress={() => onAccion(() => eliminarItem(item.id), 'Requisito eliminado')}
             disabled={ocupado}
           />
         </View>
@@ -649,6 +665,7 @@ function DescargaPaquete({
   const [error, setError] = useState<string | null>(null);
   const [resultado, setResultado] = useState<string | null>(null);
   const [url, setUrl] = useState<string | null>(null);
+  const toast = useToast();
   const problemas = problemasPaquete(items);
   const hayProblemas = problemas.vencidos.length + problemas.venceAntesCierre.length + problemas.sinDocumento.length > 0;
   const conDocumento = items.filter((i) => i.documento_id).length;
@@ -667,6 +684,7 @@ function DescargaPaquete({
         (r.data.vencidos ? ` · incluye ${r.data.vencidos} vencidos` : ''),
     );
     setUrl(r.data.url);
+    toast.exito('Paquete de documentos listo para descargar');
     onDescargado();
     // Si el navegador bloquea la ventana, queda el botón «Abrir descarga».
     Linking.openURL(r.data.url).catch(() => undefined);

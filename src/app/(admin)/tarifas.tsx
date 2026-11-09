@@ -18,6 +18,7 @@ import { Insignia, type Tono } from '@/components/insignia';
 import { Mensaje } from '@/components/mensaje';
 import { PantallaFormulario } from '@/components/pantalla-formulario';
 import { SelectorOpciones } from '@/components/selector-opciones';
+import { HostToast, useToast } from '@/components/toast';
 import { Colors, Radius, Spacing } from '@/constants/theme';
 import { JORNADAS, formatearPesos, hoyEnColombia } from '@/lib/cotizador';
 import { listarRutas, type Ruta } from '@/lib/rutas';
@@ -160,6 +161,7 @@ export default function Tarifas() {
             }}
           />
         ) : null}
+        <HostToast />
       </Modal>
     </>
   );
@@ -185,6 +187,7 @@ function FormularioTarifaModal({
   const [error, setError] = useState<string | null>(null);
   const [guardando, setGuardando] = useState(false);
   const [confirmarEliminar, setConfirmarEliminar] = useState(false);
+  const toast = useToast();
 
   function cambiar<K extends keyof FormularioTarifa>(campo: K, valor: FormularioTarifa[K]) {
     setDatos((d) => ({ ...d, [campo]: valor }));
@@ -199,7 +202,10 @@ function FormularioTarifaModal({
     setError(null);
     const r = await guardarTarifa(datos, id);
     setGuardando(false);
-    if (r.ok) onGuardado();
+    if (r.ok) {
+      toast.exito(id ? 'Tarifa actualizada' : 'Tarifa agregada');
+      onGuardado();
+    }
     else setError(r.error);
   }
 
@@ -208,7 +214,10 @@ function FormularioTarifaModal({
     setGuardando(true);
     const r = await eliminarTarifa(id);
     setGuardando(false);
-    if (r.ok) onGuardado();
+    if (r.ok) {
+      toast.exito('Tarifa eliminada');
+      onGuardado();
+    }
     else setError(r.error);
   }
 

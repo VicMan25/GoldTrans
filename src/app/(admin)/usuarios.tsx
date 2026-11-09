@@ -7,6 +7,7 @@ import { conEntrada, EsqueletoLista } from '@/components/cargando';
 import { EstadoVacio } from '@/components/estado-vacio';
 import { Mensaje } from '@/components/mensaje';
 import { SelectorOpciones } from '@/components/selector-opciones';
+import { useToast } from '@/components/toast';
 import { Colors, Radius, Spacing } from '@/constants/theme';
 import { useAuth } from '@/hooks/use-auth';
 import { ETIQUETA_ROL, ROLES_ASIGNABLES, type RolAsignable } from '@/lib/roles';
@@ -27,6 +28,7 @@ export default function Usuarios() {
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [ocupado, setOcupado] = useState<string | null>(null);
+  const toast = useToast();
 
   // Cambiar "version" vuelve a consultar la lista.
   const [version, setVersion] = useState(0);
@@ -53,14 +55,22 @@ export default function Usuarios() {
 
   async function cambiar(u: UsuarioConPerfil, cambios: { rol?: RolAsignable; activo?: boolean }) {
     setOcupado(u.id);
-    setError(null);
     const r = await actualizarUsuario(u.id, cambios);
     setOcupado(null);
+    // El mensaje de la cabecera puede quedar fuera de la vista al hacer scroll: se avisa con toast.
     if (!r.ok) {
-      setError(r.error);
+      toast.error(r.error);
       return;
     }
     setUsuarios((lista) => lista.map((x) => (x.id === u.id ? { ...x, ...r.data } : x)));
+    const nombre = u.perfil?.razon_social || u.perfil?.nombre_completo || u.email;
+    toast.exito(
+      cambios.rol
+        ? `${nombre} ahora es ${ETIQUETA_ROL[cambios.rol]}`
+        : cambios.activo
+          ? `Cuenta de ${nombre} activada`
+          : `Cuenta de ${nombre} desactivada`,
+    );
   }
 
   const visibles = filtrarUsuarios(usuarios, busqueda);

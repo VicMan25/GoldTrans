@@ -1,13 +1,22 @@
 import { Stack } from 'expo-router';
 
+import { View } from 'react-native';
+
 import { opcionesPila } from '@/components/navegacion';
+import { HostToast, ToastProvider } from '@/components/toast';
 import { AuthProvider, useAuth } from '@/hooks/use-auth';
 
 export default function RootLayout() {
   return (
-    <AuthProvider>
-      <RootNavigator />
-    </AuthProvider>
+    <ToastProvider>
+      <AuthProvider>
+        <View style={{ flex: 1 }}>
+          <RootNavigator />
+          {/* Avisos de confirmación (guardado, eliminado…) sobre todas las pantallas. */}
+          <HostToast />
+        </View>
+      </AuthProvider>
+    </ToastProvider>
   );
 }
 

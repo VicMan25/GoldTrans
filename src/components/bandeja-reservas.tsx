@@ -19,6 +19,7 @@ import { Mensaje } from '@/components/mensaje';
 import { PantallaFormulario } from '@/components/pantalla-formulario';
 import { ResumenPagosVista } from '@/components/resumen-pagos';
 import { SelectorOpciones } from '@/components/selector-opciones';
+import { HostToast, useToast } from '@/components/toast';
 import { VistaComprobante } from '@/components/vista-comprobante';
 import { Colors, Radius, Spacing } from '@/constants/theme';
 import { enlaceWhatsApp } from '@/lib/compartir';
@@ -165,6 +166,7 @@ export function BandejaReservas({ encabezado }: { encabezado?: ReactNode }) {
             }}
           />
         ) : null}
+        <HostToast />
       </Modal>
     </>
   );
@@ -183,8 +185,8 @@ function Dato({ etiqueta, valor }: { etiqueta: string; valor?: string | null }) 
 function DetalleReserva({ reservaId, onCerrar }: { reservaId: string; onCerrar: () => void }) {
   const [reserva, setReserva] = useState<ReservaBandeja | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [aviso, setAviso] = useState<string | null>(null);
   const [version, setVersion] = useState(0);
+  const toast = useToast();
 
   useEffect(() => {
     let vigente = true;
@@ -214,13 +216,13 @@ function DetalleReserva({ reservaId, onCerrar }: { reservaId: string; onCerrar: 
     p?.tipo_persona === 'empresa' ? `NIT ${p.nit}` : p?.numero_documento ? `${p.tipo_documento} ${p.numero_documento}` : null;
 
   function recargar(mensaje: string) {
-    setAviso(mensaje);
+    toast.exito(mensaje);
     setVersion((v) => v + 1);
   }
 
   function escribir() {
     const texto = `Hola, te escribimos de GOLDTRANS sobre tu reserva ${r.codigo} (${r.paquete_nombre}).`;
-    Linking.openURL(enlaceWhatsApp(texto, r.telefono_contacto)).catch(() => setError('No se pudo abrir WhatsApp'));
+    Linking.openURL(enlaceWhatsApp(texto, r.telefono_contacto)).catch(() => toast.error('No se pudo abrir WhatsApp'));
   }
 
   return (
@@ -241,7 +243,6 @@ function DetalleReserva({ reservaId, onCerrar }: { reservaId: string; onCerrar: 
         </Text>
       ) : null}
       {r.motivo_cancelacion ? <Text style={styles.nota}>Motivo: {r.motivo_cancelacion}</Text> : null}
-      <Mensaje tipo="exito" texto={aviso} />
       <Mensaje texto={error} />
 
       <Text style={styles.seccion}>Cliente</Text>

@@ -3,6 +3,7 @@ import { useCallback, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { Boton } from '@/components/boton';
+import { useToast } from '@/components/toast';
 import { Colors, Radius, Spacing } from '@/constants/theme';
 import { useAuth } from '@/hooks/use-auth';
 import { listarMisAlertas, marcarAlertasLeidas, type Alerta } from '@/lib/licitaciones';
@@ -13,6 +14,7 @@ export function AlertasVencimiento() {
   const [alertas, setAlertas] = useState<Alerta[]>([]);
   const [abiertas, setAbiertas] = useState(false);
   const [ocupado, setOcupado] = useState(false);
+  const toast = useToast();
 
   useFocusEffect(
     useCallback(() => {
@@ -33,7 +35,10 @@ export function AlertasVencimiento() {
     setOcupado(true);
     const r = await marcarAlertasLeidas(alertas.map((a) => a.id));
     setOcupado(false);
-    if (r.ok) setAlertas([]);
+    if (r.ok) {
+      toast.exito('Alertas marcadas como leídas');
+      setAlertas([]);
+    } else toast.error(r.error);
   }
 
   const urgentes = alertas.filter((a) => a.umbral <= 15).length;
