@@ -19,6 +19,7 @@ import { EstadoVacio } from '@/components/estado-vacio';
 import { Mensaje } from '@/components/mensaje';
 import { PantallaFormulario } from '@/components/pantalla-formulario';
 import { SelectorOpciones } from '@/components/selector-opciones';
+import { HostToast, useToast } from '@/components/toast';
 import { Colors, Radius, Spacing } from '@/constants/theme';
 import { enlaceWhatsApp } from '@/lib/compartir';
 import { ETIQUETA_SERVICIO, formatearPesos, type TipoServicio } from '@/lib/cotizador';
@@ -157,6 +158,7 @@ export function BandejaSolicitudes({ encabezado }: { encabezado?: ReactNode }) {
             }}
           />
         ) : null}
+        <HostToast />
       </Modal>
     </>
   );
@@ -187,6 +189,7 @@ function DetalleSolicitud({
   const [errores, setErrores] = useState<Errores<'valor' | 'motivo'>>({});
   const [error, setError] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
+  const toast = useToast();
 
   const c = s.cotizacion;
   const p = s.cliente?.perfil;
@@ -201,15 +204,22 @@ function DetalleSolicitud({
     setError(null);
     const r = await responderSolicitud(s.id, accion, valor, motivo);
     setEnviando(false);
-    if (r.ok) onRespondida();
+    if (r.ok) {
+      toast.exito(
+        accion === 'confirmar'
+          ? `Solicitud ${s.codigo} confirmada`
+          : accion === 'ajustar'
+            ? `Valor de ${s.codigo} ajustado. El cliente debe aceptarlo.`
+            : `Solicitud ${s.codigo} rechazada. El cliente verá el motivo.`,
+      );
+      onRespondida();
+    }
     else setError(r.error);
   }
 
   function escribir() {
     const texto = `Hola ${s.nombre_contacto}, te escribimos de GOLDTRANS sobre tu solicitud ${s.codigo}.`;
-    Linking.openURL(enlaceWhatsApp(texto, s.telefono_contacto)).catch(() =>
-      setError('No se pudo abrir WhatsApp'),
-    );
+    Linking.openURL(enlaceWhatsApp(texto, s.telefono_contacto)).catch(() => toast.error('No se pudo abrir WhatsApp'));
   }
 
   return (

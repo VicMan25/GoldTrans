@@ -11,6 +11,7 @@ import { CargandoPuntos } from '@/components/cargando';
 import { Mensaje } from '@/components/mensaje';
 import { PantallaFormulario } from '@/components/pantalla-formulario';
 import { SelectorOpciones } from '@/components/selector-opciones';
+import { HostToast, useToast } from '@/components/toast';
 import { Colors, Radius, Spacing } from '@/constants/theme';
 import { esFechaValida, hoyEnColombia, sumarDias } from '@/lib/cotizador';
 import {
@@ -127,6 +128,7 @@ function DatosPaquete({
   const [errores, setErrores] = useState<Errores<keyof FormularioPaquete>>({});
   const [error, setError] = useState<string | null>(null);
   const [guardando, setGuardando] = useState(false);
+  const toast = useToast();
 
   function cambiar<K extends keyof FormularioPaquete>(campo: K, valor: FormularioPaquete[K]) {
     setDatos((d) => ({ ...d, [campo]: valor }));
@@ -141,7 +143,10 @@ function DatosPaquete({
     setError(null);
     const r = await guardarPaquete(datos, paquete?.id);
     setGuardando(false);
-    if (r.ok) onGuardado(r.data);
+    if (r.ok) {
+      toast.exito(paquete ? 'Cambios del paquete guardados' : 'Paquete creado. Ahora agrega fotos, itinerario y fechas.');
+      onGuardado(r.data);
+    }
     else setError(r.error);
   }
 
@@ -214,16 +219,20 @@ function DatosPaquete({
 
 function Fotos({ paquete, onCambio }: { paquete: PaqueteCompleto; onCambio: () => void }) {
   const [elegida, setElegida] = useState<ImagenPaquete | null>(null);
+  const [confirmarEliminar, setConfirmarEliminar] = useState(false);
   const [ocupado, setOcupado] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const toast = useToast();
 
-  async function ejecutar(accion: () => Promise<{ ok: boolean; error?: string }>) {
+  async function ejecutar(accion: () => Promise<{ ok: boolean; error?: string }>, mensaje: string) {
     setOcupado(true);
     setError(null);
     const r = await accion();
     setOcupado(false);
     if (r.ok) {
       setElegida(null);
+      setConfirmarEliminar(false);
+      toast.exito(mensaje);
       onCambio();
     } else setError(r.error ?? 'No se pudo completar la acción');
   }
@@ -244,7 +253,7 @@ function Fotos({ paquete, onCambio }: { paquete: PaqueteCompleto; onCambio: () =
     }
     const base64 = archivo.base64;
     const siguiente = Math.max(-1, ...paquete.imagenes.map((i) => i.orden)) + 1;
-    await ejecutar(() => subirImagen(paquete.id, { base64, mimeType: archivo.mimeType }, siguiente));
+    await ejecutar(() => subirImagen(paquete.id, { base64, mimeType: archivo.mimeType }, siguiente), 'Foto agregada');
   }
 
   return (
@@ -256,7 +265,10 @@ function Fotos({ paquete, onCambio }: { paquete: PaqueteCompleto; onCambio: () =
             key={img.id}
             accessibilityRole="button"
             accessibilityLabel={i === 0 ? 'Foto de portada' : `Foto ${i + 1}`}
-            onPress={() => setElegida(elegida?.id === img.id ? null : img)}>
+            onPress={() => {
+              setElegida(elegida?.id === img.id ? null : img);
+              setConfirmarEliminar(false);
+            }}>
             <Image
               source={urlImagen(img.ruta)}
               style={[styles.miniatura, elegida?.id === img.id && styles.miniaturaElegida]}
@@ -273,10 +285,22 @@ function Fotos({ paquete, onCambio }: { paquete: PaqueteCompleto; onCambio: () =
               titulo="Usar como portada"
               variante="secundario"
               cargando={ocupado}
-              onPress={() => ejecutar(() => hacerPortada(elegida, paquete.imagenes))}
+              onPress={() => ejecutar(() => hacerPortada(elegida, paquete.imagenes), 'Portada actualizada')}
             />
           ) : null}
-          <Boton titulo="Eliminar foto" variante="peligro" cargando={ocupado} onPress={() => ejecutar(() => eliminarImagen(elegida))} />
+          {confirmarEliminar ? (
+            <>
+              <Boton
+                titulo="Confirmar: eliminar foto"
+                variante="peligro"
+                cargando={ocupado}
+                onPress={() => ejecutar(() => eliminarImagen(elegida), 'Foto eliminada')}
+              />
+              <Boton titulo="No eliminar" variante="texto" onPress={() => setConfirmarEliminar(false)} disabled={ocupado} />
+            </>
+          ) : (
+            <Boton titulo="Eliminar foto" variante="peligro" onPress={() => setConfirmarEliminar(true)} disabled={ocupado} />
+          )}
         </View>
       ) : null}
       <Mensaje texto={error} />
@@ -349,24 +373,34 @@ function FormularioDiaModal({
   const [errores, setErrores] = useState<Errores<keyof FormularioDia>>({});
   const [error, setError] = useState<string | null>(null);
   const [guardando, setGuardando] = useState(false);
+  const [confirmarEliminar, setConfirmarEliminar] = useState(false);
+  const toast = useToast();
 
   async function guardar() {
     const nuevos = validarDia(datos, paquete.duracion_dias);
     setErrores(nuevos);
     if (!sinErrores(nuevos)) return;
     setGuardando(true);
+    setError(null);
     const r = await guardarDia(paquete.id, datos, dia?.id);
     setGuardando(false);
-    if (r.ok) onGuardado();
+    if (r.ok) {
+      toast.exito(dia ? `Día ${datos.dia.trim()} actualizado` : `Día ${datos.dia.trim()} agregado al itinerario`);
+      onGuardado();
+    }
     else setError(r.error);
   }
 
   async function eliminar() {
     if (!dia) return;
     setGuardando(true);
+    setError(null);
     const r = await eliminarDia(dia.id);
     setGuardando(false);
-    if (r.ok) onGuardado();
+    if (r.ok) {
+      toast.exito(`Día ${dia.dia} eliminado del itinerario`);
+      onGuardado();
+    }
     else setError(r.error);
   }
 
@@ -397,7 +431,13 @@ function FormularioDiaModal({
       <View style={styles.botones}>
         <Boton titulo="Guardar" onPress={guardar} cargando={guardando} />
         <Boton titulo="Cancelar" variante="secundario" onPress={onCerrar} disabled={guardando} />
-        {dia ? <Boton titulo="Eliminar día" variante="texto" onPress={eliminar} disabled={guardando} /> : null}
+        {dia ? (
+          confirmarEliminar ? (
+            <Boton titulo="Confirmar eliminación" variante="peligro" onPress={eliminar} cargando={guardando} />
+          ) : (
+            <Boton titulo="Eliminar día" variante="texto" onPress={() => setConfirmarEliminar(true)} disabled={guardando} />
+          )
+        ) : null}
       </View>
     </PantallaFormulario>
   );
@@ -479,6 +519,8 @@ function FormularioFechaModal({
   const [errores, setErrores] = useState<Errores<keyof FormularioFecha>>({});
   const [error, setError] = useState<string | null>(null);
   const [guardando, setGuardando] = useState(false);
+  const [confirmarEliminar, setConfirmarEliminar] = useState(false);
+  const toast = useToast();
   const reservados = fecha?.cupos_reservados ?? 0;
 
   function cambiarSalida(v: string) {
@@ -497,18 +539,26 @@ function FormularioFechaModal({
     setErrores(nuevos);
     if (!sinErrores(nuevos)) return;
     setGuardando(true);
+    setError(null);
     const r = await guardarFecha(paquete.id, datos, fecha?.id);
     setGuardando(false);
-    if (r.ok) onGuardado();
+    if (r.ok) {
+      toast.exito(fecha ? 'Fecha de salida actualizada' : `Salida del ${datos.fechaSalida.trim()} programada`);
+      onGuardado();
+    }
     else setError(r.error);
   }
 
   async function eliminar() {
     if (!fecha) return;
     setGuardando(true);
+    setError(null);
     const r = await eliminarFecha(fecha.id);
     setGuardando(false);
-    if (r.ok) onGuardado();
+    if (r.ok) {
+      toast.exito('Fecha de salida eliminada');
+      onGuardado();
+    }
     else setError(r.error);
   }
 
@@ -546,7 +596,13 @@ function FormularioFechaModal({
       <View style={styles.botones}>
         <Boton titulo="Guardar" onPress={guardar} cargando={guardando} />
         <Boton titulo="Cancelar" variante="secundario" onPress={onCerrar} disabled={guardando} />
-        {fecha ? <Boton titulo="Eliminar salida" variante="texto" onPress={eliminar} disabled={guardando} /> : null}
+        {fecha ? (
+          confirmarEliminar ? (
+            <Boton titulo="Confirmar eliminación" variante="peligro" onPress={eliminar} cargando={guardando} />
+          ) : (
+            <Boton titulo="Eliminar salida" variante="texto" onPress={() => setConfirmarEliminar(true)} disabled={guardando} />
+          )
+        ) : null}
       </View>
     </PantallaFormulario>
   );
@@ -558,12 +614,16 @@ function Eliminar({ paquete }: { paquete: PaqueteCompleto }) {
   const [confirmar, setConfirmar] = useState(false);
   const [eliminando, setEliminando] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const toast = useToast();
 
   async function eliminar() {
     setEliminando(true);
     const r = await eliminarPaquete(paquete);
     setEliminando(false);
-    if (r.ok) router.back();
+    if (r.ok) {
+      toast.exito(`Paquete «${paquete.nombre}» eliminado`);
+      router.back();
+    }
     else setError(r.error);
   }
 
@@ -591,6 +651,7 @@ function ModalFormulario({
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onCerrar}>
       {children}
+      <HostToast />
     </Modal>
   );
 }

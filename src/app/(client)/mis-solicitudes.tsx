@@ -8,6 +8,7 @@ import { DesgloseCotizacion } from '@/components/desglose-cotizacion';
 import { EstadoSolicitudTexto } from '@/components/estado-solicitud';
 import { EstadoVacio } from '@/components/estado-vacio';
 import { Mensaje } from '@/components/mensaje';
+import { useToast } from '@/components/toast';
 import { Colors, Radius, Spacing } from '@/constants/theme';
 import { useAuth } from '@/hooks/use-auth';
 import { ETIQUETA_SERVICIO, formatearPesos, type TipoServicio } from '@/lib/cotizador';
@@ -29,6 +30,7 @@ export default function MisSolicitudes() {
   const [ocupado, setOcupado] = useState<string | null>(null);
   const [confirmarCancelar, setConfirmarCancelar] = useState<string | null>(null);
   const [version, setVersion] = useState(0);
+  const toast = useToast();
 
   useEffect(() => {
     if (!usuario) return;
@@ -51,12 +53,17 @@ export default function MisSolicitudes() {
 
   async function decidir(s: SolicitudCliente, accion: 'aceptar' | 'cancelar') {
     setOcupado(s.id);
-    setError(null);
     const r = await decidirSolicitud(s.id, accion);
     setOcupado(null);
     setConfirmarCancelar(null);
-    if (r.ok) setVersion((v) => v + 1);
-    else setError(r.error);
+    if (r.ok) {
+      toast.exito(
+        accion === 'aceptar'
+          ? `Aceptaste el valor de ${formatearPesos(valorSolicitud(s))}. Tu servicio ${s.codigo} quedó confirmado.`
+          : `Solicitud ${s.codigo} cancelada`,
+      );
+      setVersion((v) => v + 1);
+    } else toast.error(r.error);
   }
 
   return (

@@ -11,6 +11,7 @@ import { Mensaje } from '@/components/mensaje';
 import { PantallaFormulario } from '@/components/pantalla-formulario';
 import { ResumenPagosVista } from '@/components/resumen-pagos';
 import { SelectorArchivo } from '@/components/selector-archivo';
+import { useToast } from '@/components/toast';
 import { Colors, Radius, Spacing } from '@/constants/theme';
 import { abrirArchivo, type ArchivoElegido } from '@/lib/archivos';
 import { formatearPesos, hoyEnColombia } from '@/lib/cotizador';
@@ -39,7 +40,7 @@ export default function DetalleReserva() {
   const [reserva, setReserva] = useState<ReservaCompleta | null>(null);
   const [errorCarga, setErrorCarga] = useState<string | null>(null);
   const [version, setVersion] = useState(0);
-  const [aviso, setAviso] = useState<string | null>(null);
+  const toast = useToast();
   const [errorArchivo, setErrorArchivo] = useState<string | null>(null);
 
   useEffect(() => {
@@ -68,7 +69,8 @@ export default function DetalleReserva() {
   const activa = estado === 'prerreserva' || estado === 'confirmada';
 
   function recargar(mensaje: string) {
-    setAviso(mensaje);
+    // Toast: el formulario de abono queda al final de la pantalla y un aviso arriba no se vería.
+    toast.exito(mensaje);
     setVersion((v) => v + 1);
   }
 
@@ -95,7 +97,6 @@ export default function DetalleReserva() {
         </Text>
       ) : null}
       {r.motivo_cancelacion ? <Text style={styles.motivo}>Motivo: {r.motivo_cancelacion}</Text> : null}
-      <Mensaje tipo="exito" texto={aviso} />
 
       <View style={styles.paquete}>
         <Text style={styles.paqueteNombre}>{r.paquete_nombre}</Text>

@@ -10,6 +10,7 @@ import { EstadoVacio } from '@/components/estado-vacio';
 import { COLOR_VIGENCIA, EstadoVigenciaTexto } from '@/components/estado-vigencia';
 import { Mensaje } from '@/components/mensaje';
 import { PantallaFormulario } from '@/components/pantalla-formulario';
+import { HostToast, useToast } from '@/components/toast';
 import { SelectorArchivo } from '@/components/selector-archivo';
 import { SelectorOpciones } from '@/components/selector-opciones';
 import { Colors, Radius, Spacing } from '@/constants/theme';
@@ -205,6 +206,7 @@ export function RepositorioDocumentos({ encabezado }: { encabezado?: ReactNode }
             onCerrar={cerrar}
           />
         ) : null}
+        <HostToast />
       </Modal>
     </>
   );
@@ -262,6 +264,7 @@ function NuevoDocumento({
   const [errores, setErrores] = useState<Errores<keyof FormularioDocumento | 'archivo'>>({});
   const [error, setError] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
+  const toast = useToast();
 
   function cambiar(campo: keyof FormularioDocumento, valor: string) {
     setDatos((d) => ({ ...d, [campo]: valor }));
@@ -276,7 +279,10 @@ function NuevoDocumento({
     setError(null);
     const r = await crearDocumento(datos, archivo);
     setEnviando(false);
-    if (r.ok) onCerrar(true);
+    if (r.ok) {
+      toast.exito(`Documento «${datos.nombre.trim()}» guardado`);
+      onCerrar(true);
+    }
     else setError(r.error);
   }
 
@@ -337,7 +343,7 @@ function DetalleDocumento({
   const [confirmarEliminar, setConfirmarEliminar] = useState(false);
   const [ocupado, setOcupado] = useState<'version' | 'datos' | 'eliminar' | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [aviso, setAviso] = useState<string | null>(null);
+  const toast = useToast();
 
   async function subirVersion() {
     if (!archivo) {
@@ -354,7 +360,7 @@ function DetalleDocumento({
     }
     setArchivo(null);
     setNotas('');
-    setAviso(`Se guardó la versión ${r.data.version}. La anterior sigue en el historial.`);
+    toast.exito(`Se guardó la versión ${r.data.version}. La anterior sigue en el historial.`);
     onCambio();
   }
 
@@ -371,7 +377,7 @@ function DetalleDocumento({
       return;
     }
     setEditando(false);
-    setAviso('Datos actualizados.');
+    toast.exito('Datos del documento actualizados');
     onCambio();
   }
 
@@ -380,7 +386,10 @@ function DetalleDocumento({
     setError(null);
     const r = await eliminarDocumento(d);
     setOcupado(null);
-    if (r.ok) onCerrar(true);
+    if (r.ok) {
+      toast.exito(`Documento «${d.nombre}» eliminado`);
+      onCerrar(true);
+    }
     else setError(r.error);
   }
 
@@ -394,7 +403,6 @@ function DetalleDocumento({
     <PantallaFormulario titulo={d.nombre}>
       <Text style={styles.categoria}>{categorias.find((c) => c.id === d.categoria_id)?.nombre}</Text>
       {d.descripcion ? <Text style={styles.texto}>{d.descripcion}</Text> : null}
-      <Mensaje tipo="exito" texto={aviso} />
       <Mensaje texto={error} />
 
       <SeccionVigencia documento={d} personal={personal} onCambio={onCambio} />
@@ -502,6 +510,7 @@ function SeccionVigencia({
   const [errores, setErrores] = useState<Errores<keyof FormularioVigencia>>({});
   const [error, setError] = useState<string | null>(null);
   const [ocupado, setOcupado] = useState(false);
+  const toast = useToast();
   const v = d.vigencia;
   const responsable = personal.find((p) => p.id === v?.responsable_id);
 
@@ -523,6 +532,7 @@ function SeccionVigencia({
       return;
     }
     setEditando(false);
+    toast.exito(`Vigencia guardada: vence el ${datos.fechaVencimiento.trim()}`);
     onCambio();
   }
 
@@ -537,6 +547,7 @@ function SeccionVigencia({
     }
     setDatos(vigenciaAFormulario(null, usuario?.id ?? ''));
     setEditando(false);
+    toast.exito('Vigencia eliminada: el documento queda sin vencimiento');
     onCambio();
   }
 
@@ -608,6 +619,7 @@ function NuevaCategoria({ onCerrar }: { onCerrar: (recargar: boolean) => void })
   const [errorNombre, setErrorNombre] = useState<string | undefined>();
   const [error, setError] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
+  const toast = useToast();
 
   async function guardar() {
     const problema = requerido(nombre, 'Indica el nombre de la categoría');
@@ -617,7 +629,10 @@ function NuevaCategoria({ onCerrar }: { onCerrar: (recargar: boolean) => void })
     setError(null);
     const r = await crearCategoria(nombre, descripcion);
     setEnviando(false);
-    if (r.ok) onCerrar(true);
+    if (r.ok) {
+      toast.exito(`Categoría «${nombre.trim()}» creada`);
+      onCerrar(true);
+    }
     else setError(r.error);
   }
 

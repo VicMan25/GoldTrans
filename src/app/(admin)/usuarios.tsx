@@ -7,6 +7,7 @@ import { conEntrada, EsqueletoLista } from '@/components/cargando';
 import { EstadoVacio } from '@/components/estado-vacio';
 import { Mensaje } from '@/components/mensaje';
 import { SelectorOpciones } from '@/components/selector-opciones';
+import { useToast } from '@/components/toast';
 import { Colors, Radius, Spacing } from '@/constants/theme';
 import { useAuth } from '@/hooks/use-auth';
 import { ETIQUETA_ROL, ROLES_ASIGNABLES, type RolAsignable } from '@/lib/roles';
@@ -27,6 +28,8 @@ export default function Usuarios() {
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [ocupado, setOcupado] = useState<string | null>(null);
+  const [confirmarDesactivar, setConfirmarDesactivar] = useState<string | null>(null);
+  const toast = useToast();
 
   // Cambiar "version" vuelve a consultar la lista.
   const [version, setVersion] = useState(0);
@@ -53,14 +56,23 @@ export default function Usuarios() {
 
   async function cambiar(u: UsuarioConPerfil, cambios: { rol?: RolAsignable; activo?: boolean }) {
     setOcupado(u.id);
-    setError(null);
     const r = await actualizarUsuario(u.id, cambios);
     setOcupado(null);
+    setConfirmarDesactivar(null);
+    // El mensaje de la cabecera puede quedar fuera de la vista al hacer scroll: se avisa con toast.
     if (!r.ok) {
-      setError(r.error);
+      toast.error(r.error);
       return;
     }
     setUsuarios((lista) => lista.map((x) => (x.id === u.id ? { ...x, ...r.data } : x)));
+    const nombre = u.perfil?.razon_social || u.perfil?.nombre_completo || u.email;
+    toast.exito(
+      cambios.rol
+        ? `${nombre} ahora es ${ETIQUETA_ROL[cambios.rol]}`
+        : cambios.activo
+          ? `Cuenta de ${nombre} activada`
+          : `Cuenta de ${nombre} desactivada`,
+    );
   }
 
   const visibles = filtrarUsuarios(usuarios, busqueda);
@@ -117,14 +129,22 @@ export default function Usuarios() {
               onCambio={(rol) => rol !== u.rol && cambiar(u, { rol })}
               deshabilitado={esYo || ocupado === u.id}
             />
-            {!esYo ? (
-              <Boton
-                titulo={u.activo ? 'Desactivar' : 'Activar'}
-                variante={u.activo ? 'peligro' : 'secundario'}
-                cargando={ocupado === u.id}
-                onPress={() => cambiar(u, { activo: !u.activo })}
-              />
-            ) : null}
+            {esYo ? null : !u.activo ? (
+              <Boton titulo="Activar" variante="secundario" cargando={ocupado === u.id} onPress={() => cambiar(u, { activo: true })} />
+            ) : confirmarDesactivar === u.id ? (
+              <View style={styles.confirmar}>
+                <Text style={styles.detalle}>La persona no podrá iniciar sesión hasta que la actives de nuevo.</Text>
+                <Boton
+                  titulo="Confirmar desactivación"
+                  variante="peligro"
+                  cargando={ocupado === u.id}
+                  onPress={() => cambiar(u, { activo: false })}
+                />
+                <Boton titulo="No desactivar" variante="texto" onPress={() => setConfirmarDesactivar(null)} disabled={ocupado === u.id} />
+              </View>
+            ) : (
+              <Boton titulo="Desactivar" variante="peligro" onPress={() => setConfirmarDesactivar(u.id)} />
+            )}
           </View>
         );
       })}
@@ -142,6 +162,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   inactiva: { backgroundColor: Colors.surface },
+  confirmar: { gap: Spacing.sm },
   nombre: { fontSize: 16, fontWeight: '700', color: Colors.text },
   detalle: { fontSize: 14, color: Colors.muted, marginTop: 2 },
   estado: { fontSize: 13, fontWeight: '600', marginVertical: Spacing.sm },

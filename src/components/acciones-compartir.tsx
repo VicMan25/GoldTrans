@@ -3,6 +3,7 @@ import { StyleSheet, View } from 'react-native';
 
 import { Boton } from '@/components/boton';
 import { Mensaje } from '@/components/mensaje';
+import { useToast } from '@/components/toast';
 import { Spacing } from '@/constants/theme';
 import type { Resultado } from '@/lib/auth';
 import {
@@ -24,6 +25,7 @@ const ACCIONES: Record<Accion, (c: CotizacionCompartible) => Promise<Resultado>>
 export function AccionesCompartir({ cotizacion }: { cotizacion: CotizacionCompartible }) {
   const [ocupado, setOcupado] = useState<Accion | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const toast = useToast();
 
   async function ejecutar(accion: Accion) {
     setOcupado(accion);
@@ -31,6 +33,8 @@ export function AccionesCompartir({ cotizacion }: { cotizacion: CotizacionCompar
     const r = await ACCIONES[accion](cotizacion);
     setOcupado(null);
     if (!r.ok) setError(r.error);
+    // WhatsApp y correo abren otra app; el PDF se queda aquí y necesita confirmación.
+    else if (accion === 'pdf') toast.exito(`PDF de la cotización ${cotizacion.codigo} generado`);
   }
 
   return (

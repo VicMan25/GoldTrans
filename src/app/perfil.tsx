@@ -6,6 +6,7 @@ import { Boton } from '@/components/boton';
 import { CamposPerfil } from '@/components/campos-perfil';
 import { Mensaje } from '@/components/mensaje';
 import { PantallaFormulario } from '@/components/pantalla-formulario';
+import { useToast } from '@/components/toast';
 import { Colors, Radius, Spacing } from '@/constants/theme';
 import { useAuth } from '@/hooks/use-auth';
 import { cerrarSesion } from '@/lib/auth';
@@ -20,15 +21,14 @@ export default function Perfil() {
   const [datos, setDatos] = useState<DatosPerfil>(() => perfilAFormulario(usuario?.perfil ?? null));
   const [errores, setErrores] = useState<Errores<keyof DatosPerfil>>({});
   const [error, setError] = useState<string | null>(null);
-  const [exito, setExito] = useState<string | null>(null);
   const [guardando, setGuardando] = useState(false);
+  const toast = useToast();
 
   if (!usuario) return null;
 
   function cambiar<K extends keyof DatosPerfil>(campo: K, valor: DatosPerfil[K]) {
     setDatos((d) => ({ ...d, [campo]: valor }));
     setErrores((e) => ({ ...e, [campo]: undefined }));
-    setExito(null);
   }
 
   async function guardar() {
@@ -44,7 +44,7 @@ export default function Perfil() {
       setError(r.error);
       return;
     }
-    setExito('Perfil actualizado');
+    toast.exito('Perfil actualizado');
     await recargarUsuario();
   }
 
@@ -58,7 +58,6 @@ export default function Perfil() {
       <CamposPerfil datos={datos} errores={errores} onCambio={cambiar} tipoBloqueado />
 
       <Mensaje texto={error} />
-      <Mensaje tipo="exito" texto={exito} />
       <Boton titulo="Guardar cambios" onPress={guardar} cargando={guardando} />
 
       {/* RNF-03 · Prueba de la autorización visible para el titular (Ley 1581 de 2012). */}

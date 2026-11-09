@@ -8,6 +8,7 @@ import { CampoTexto } from '@/components/campo-texto';
 import { CargandoPuntos } from '@/components/cargando';
 import { Mensaje } from '@/components/mensaje';
 import { PantallaFormulario } from '@/components/pantalla-formulario';
+import { useToast } from '@/components/toast';
 import { SelectorOpciones } from '@/components/selector-opciones';
 import { Colors, Radius, Spacing } from '@/constants/theme';
 import { useAuth } from '@/hooks/use-auth';
@@ -56,6 +57,7 @@ export default function NuevaReserva() {
   const [errores, setErrores] = useState<ErroresReserva>({ viajeros: [] });
   const [error, setError] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
+  const toast = useToast();
 
   useEffect(() => {
     let vigente = true;
@@ -115,7 +117,10 @@ export default function NuevaReserva() {
     setError(null);
     const r = await crearReserva(fecha.id, viajeros, telefono, observaciones);
     setEnviando(false);
-    if (r.ok) router.replace({ pathname: '/reservas/[id]', params: { id: r.data.id } });
+    if (r.ok) {
+      toast.exito(`Reserva ${r.data.codigo} creada. Registra el abono para confirmarla.`);
+      router.replace({ pathname: '/reservas/[id]', params: { id: r.data.id } });
+    }
     else setError(r.error);
   }
 
